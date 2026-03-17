@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Horarios - Acceso</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0d0f14;
+            --surface: #13161d;
+            --surface2: #1a1e28;
+            --border: #2a2f3e;
+            --accent: #c8a96e;
+            --accent2: #e8c98e;
+            --text: #eeeae2;
+            --muted: #7a7d8a;
+            --error: #e07070;
+            --success: #70c9a0;
+        }
+
+        body {
+            background: var(--bg);
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .page {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .left {
+            background: var(--surface);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 64px 72px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow: hidden;
+            border-right: 1px solid var(--border);
+        }
+
+        .left::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(200, 169, 110, 0.12) 0%, transparent 70%);
+            top: -100px;
+            left: -100px;
+            pointer-events: none;
+        }
+
+        .left::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(200, 169, 110, 0.06) 0%, transparent 70%);
+            bottom: 60px;
+            right: -60px;
+            pointer-events: none;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 64px;
+        }
+
+        .brand-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--accent);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'DM Serif Display', serif;
+            font-size: 18px;
+            color: #0d0f14;
+            font-weight: 700;
+        }
+
+        .brand-name {
+            font-family: 'DM Serif Display', serif;
+            font-size: 22px;
+            color: var(--text);
+        }
+
+        .left-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 52px;
+            line-height: 1.1;
+            color: var(--text);
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .left-title em {
+            font-style: italic;
+            color: var(--accent);
+        }
+
+        .left-desc {
+            font-size: 16px;
+            color: var(--muted);
+            line-height: 1.7;
+            max-width: 360px;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 48px;
+            font-weight: 300;
+        }
+
+        .features {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .feature-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .grid-decoration {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            opacity: 0.04;
+            background-image: linear-gradient(var(--accent) 1px, transparent 1px), linear-gradient(90deg, var(--accent) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        .right {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 48px 40px;
+            background: var(--bg);
+            overflow-y: auto;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 440px;
+            margin: auto 0;
+            padding: 8px 0;
+            animation: fadeUp 0.5s ease both;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tab-row {
+            display: flex;
+            background: var(--surface);
+            border-radius: 14px;
+            padding: 4px;
+            margin-bottom: 36px;
+            border: 1px solid var(--border);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--muted);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            letter-spacing: 0.02em;
+        }
+
+        .tab.active {
+            background: var(--surface2);
+            color: var(--accent);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 30px;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+
+        .form-subtitle {
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 28px;
+            font-weight: 300;
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .field label {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap input {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 13px 16px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .input-wrap input::placeholder {
+            color: #3a3f50;
+        }
+
+        .input-wrap input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(200, 169, 110, 0.1);
+        }
+
+        .input-wrap.has-icon input {
+            padding-right: 44px;
+        }
+
+        .eye-btn {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 16px;
+            line-height: 1;
+            padding: 0;
+            transition: color 0.2s;
+        }
+
+        .eye-btn:hover {
+            color: var(--accent);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--accent);
+            color: #0d0f14;
+            border: none;
+            border-radius: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            letter-spacing: 0.03em;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px rgba(200, 169, 110, 0.25);
+        }
+
+        .submit-btn:hover {
+            background: var(--accent2);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 28px rgba(200, 169, 110, 0.35);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .alert.error {
+            background: rgba(224, 112, 112, 0.1);
+            border: 1px solid rgba(224, 112, 112, 0.25);
+            color: var(--error);
+        }
+
+        .alert.success {
+            background: rgba(112, 201, 160, 0.1);
+            border: 1px solid rgba(112, 201, 160, 0.25);
+            color: var(--success);
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        hr.divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 24px 0;
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .footer-note button {
+            background: none;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 0;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .page {
+                grid-template-columns: 1fr;
+                min-height: 100vh;
+            }
+
+            .left {
+                display: none;
+            }
+
+            .right {
+                padding: 48px 24px;
+                align-items: flex-start;
+                min-height: 100vh;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+
+        <div class="left">
+            <div class="brand">
+                <div class="brand-icon">H</div>
+                <span class="brand-name">Gestion de horarios</span>
+            </div>
+            <h1 class="left-title">Gestiona tus<br><em>horarios</em><br>con orden.</h1>
+            <p class="left-desc">Plataforma para administradores, profesores y estudiantes. Organiza grupos, salones y
+                clases desde un solo lugar.</p>
+            <div class="features">
+                <div class="feature"><span class="feature-dot"></span> Gestion de grupos y salones</div>
+                <div class="feature"><span class="feature-dot"></span> Asignacion de horarios por dia</div>
+                <div class="feature"><span class="feature-dot"></span> Notificaciones en tiempo real</div>
+                <div class="feature"><span class="feature-dot"></span> Roles: administrador, profesor, estudiante</div>
+            </div>
+            <div class="grid-decoration"></div>
+        </div>
+
+        <div class="right">
+            <div class="card">
+                <div class="tab-row">
+                    <button class="tab active" id="tab-login" onclick="switchTab('login')">Iniciar sesion</button>
+                    <button class="tab" id="tab-register" onclick="switchTab('register')">Registrarse</button>
+                </div>
+
+                <!-- LOGIN -->
+                <div class="panel active" id="panel-login">
+                    <h2 class="form-title">Bienvenido de nuevo</h2>
+                    <p class="form-subtitle">Ingresa tus credenciales para continuar.</p>
+
+                    <div class="alert error" id="login-error"></div>
+                    <div class="alert success" id="login-success"></div>
+
+                    <div class="field">
+                        <label for="login-nickname">Usuario</label>
+                        <div class="input-wrap">
+                            <input type="text" id="login-nickname" placeholder="correo" autocomplete="username" />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="login-pass">Contrasena</label>
+                        <div class="input-wrap has-icon">
+                            <input type="password" id="login-pass"
+                                placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+                                autocomplete="current-password" onkeydown="if(event.key==='Enter') handleLogin()" />
+                            <button class="eye-btn" onclick="togglePass('login-pass', this)"
+                                type="button">&#128065;</button>
+                        </div>
+                    </div>
+
+                    <button class="submit-btn" onclick="handleLogin()">Iniciar sesion</button>
+                    <hr class="divider" />
+                    <p class="footer-note">No tienes cuenta? <button onclick="switchTab('register')">Registrate
+                            aqui</button></p>
+                </div>
+
+                <!-- REGISTER -->
+                <div class="panel" id="panel-register">
+                    <h2 class="form-title">Crear cuenta</h2>
+                    <p class="form-subtitle">Completa los datos. Tu rol sera asignado por un administrador.</p>
+
+                    <div class="alert error" id="reg-error"></div>
+                    <div class="alert success" id="reg-success"></div>
+
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="reg-nombre">Nombre</label>
+                            <div class="input-wrap"><input type="text" id="reg-nombre" placeholder="Juan" /></div>
+                        </div>
+                        <div class="field">
+                            <label for="reg-apellido">Apellido</label>
+                            <div class="input-wrap"><input type="text" id="reg-apellido" placeholder="Perez" /></div>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="reg-nickname">Nickname</label>
+                        <div class="input-wrap"><input type="text" id="reg-nickname" placeholder="juan_perez"
+                                autocomplete="username" /></div>
+                    </div>
+
+                    <div class="field">
+                        <label for="reg-correo">Correo electronico</label>
+                        <div class="input-wrap"><input type="email" id="reg-correo" placeholder="juan@correo.com"
+                                autocomplete="email" /></div>
+                    </div>
+
+                    <!-- SIN selector de rol: el backend asigna rol_id=3 (Estudiante) por defecto -->
+
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="reg-pass">Contrasena</label>
+                            <div class="input-wrap has-icon">
+                                <input type="password" id="reg-pass"
+                                    placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+                                    autocomplete="new-password" />
+                                <button class="eye-btn" onclick="togglePass('reg-pass', this)"
+                                    type="button">&#128065;</button>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="reg-confirm">Confirmar</label>
+                            <div class="input-wrap has-icon">
+                                <input type="password" id="reg-confirm"
+                                    placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+                                    autocomplete="new-password" />
+                                <button class="eye-btn" onclick="togglePass('reg-confirm', this)"
+                                    type="button">&#128065;</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="submit-btn" onclick="handleRegister()">Crear cuenta</button>
+                    <hr class="divider" />
+                    <p class="footer-note">Ya tienes cuenta? <button onclick="switchTab('login')">Inicia sesion</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Funciones de Utilidad ---
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            const tabEl = document.getElementById('tab-' + tab);
+            const panelEl = document.getElementById('panel-' + tab);
+            if (tabEl && panelEl) {
+                tabEl.classList.add('active');
+                panelEl.classList.add('active');
+            }
+            clearAlerts();
+        }
+
+        function togglePass(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = 'X';
+            } else {
+                input.type = 'password';
+                btn.textContent = 'O';
+            }
+        }
+
+        function showAlert(id, msg) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = msg;
+                el.classList.add('show');
+            }
+        }
+
+        function clearAlerts() {
+            document.querySelectorAll('.alert').forEach(a => {
+                a.classList.remove('show');
+                a.textContent = '';
+            });
+        }
+
+        // --- Lógica de Inicio de Sesión ---
+        function handleLogin() {
+            clearAlerts();
+            // Nota: Usamos 'login-nickname' como ID según tu código, pero enviamos 'correo' al PHP
+            const correo = document.getElementById('login-nickname').value.trim();
+            const contrasena = document.getElementById('login-pass').value;
+
+            if (!correo || !contrasena) {
+                showAlert('login-error', 'Por favor completa todos los campos.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('correo', correo);
+            formData.append('contrasena', contrasena);
+
+            fetch('api/login.php', {
+                method: 'POST',
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.ok) {
+                        showAlert('login-success', 'Bienvenido, redirigiendo...');
+                        localStorage.setItem('user', JSON.stringify(data.datos));
+                        setTimeout(() => {
+                            // Redirección basada en el rol que devuelve tu PHP
+                            window.location.href = (data.rol_id == 1) ? 'admin.html' : 'user.html';
+                        }, 800);
+                    } else {
+                        showAlert('login-error', data.mensaje || 'Credenciales incorrectas.');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    showAlert('login-error', 'Error al conectar con el servidor.');
+                });
+        }
+
+        // --- Lógica de Registro ---
+        function handleRegister() {
+            clearAlerts();
+            const nombre = document.getElementById('reg-nombre').value.trim();
+            const apellido = document.getElementById('reg-apellido').value.trim();
+            const nickname = document.getElementById('reg-nickname').value.trim();
+            const correo = document.getElementById('reg-correo').value.trim();
+            const contrasena = document.getElementById('reg-pass').value;
+            const confirmar = document.getElementById('reg-confirm').value;
+
+            // Validaciones
+            if (!nombre || !apellido || !nickname || !correo || !contrasena || !confirmar) {
+                showAlert('reg-error', 'Por favor completa todos los campos.');
+                return;
+            }
+
+            if (contrasena !== confirmar) {
+                showAlert('reg-error', 'Las contraseñas no coinciden.');
+                return;
+            }
+
+            const formData = new FormData();
+            // Estos nombres deben coincidir con $_POST['nombre'], etc., en tu PHP
+            formData.append('nombre', nombre);
+            formData.append('apellido', apellido);
+            formData.append('nickname', nickname);
+            formData.append('correo', correo);
+            formData.append('contrasena', contrasena);
+
+            fetch('api/register.php', {
+                method: 'POST',
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.ok) {
+                        alert('¡Cuenta creada exitosamente!');
+                        switchTab('login'); // Te manda a la pestaña de login
+                    } else {
+                        showAlert('reg-error', data.mensaje || 'Error al registrar.');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    showAlert('reg-error', 'Error al conectar con el servidor.');
+                });
+        }
+    </script>
+
+</body>
+
+</html>

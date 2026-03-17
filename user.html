@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Horarios — Mi Panel</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --bg: #0d0f14;
+            --surface: #13161d;
+            --surface2: #1a1e28;
+            --surface3: #21263a;
+            --border: #2a2f3e;
+            --accent: #c8a96e;
+            --accent2: #e8c98e;
+            --text: #eeeae2;
+            --muted: #7a7d8a;
+            --danger: #e07070;
+            --success: #70c9a0;
+            --sw: 220px;
+            --c0: #c8a96e;
+            --c1: #64a0dc;
+            --c2: #78c88c;
+            --c3: #c878b4;
+            --c4: #dc9664;
+            --c5: #a08cdc;
+            --c6: #60c8c0;
+            --c7: #e0b060;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden
+        }
+
+        body {
+            display: flex;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text);
+            background: var(--bg)
+        }
+
+        /* ── SIDEBAR ── */
+        .sb {
+            width: var(--sw);
+            min-height: 100vh;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0
+        }
+
+        .sb-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 22px 18px 18px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .sb-logo {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'DM Serif Display', serif;
+            font-size: 15px;
+            color: #0d0f14;
+            font-weight: 700;
+            flex-shrink: 0
+        }
+
+        .sb-name {
+            font-family: 'DM Serif Display', serif;
+            font-size: 17px
+        }
+
+        .sb-nav {
+            flex: 1;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            overflow-y: auto
+        }
+
+        .sb-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--muted);
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            padding: 14px 10px 5px
+        }
+
+        .ni {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 11px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 13.5px;
+            color: var(--muted);
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            font-family: 'DM Sans', sans-serif;
+            transition: background .15s, color .15s
+        }
+
+        .ni:hover {
+            background: var(--surface2);
+            color: var(--text)
+        }
+
+        .ni.active {
+            background: var(--surface3);
+            color: var(--accent);
+            font-weight: 500
+        }
+
+        .ni-ic {
+            width: 18px;
+            text-align: center;
+            flex-shrink: 0;
+            font-size: 14px
+        }
+
+        .nb {
+            margin-left: auto;
+            background: var(--accent);
+            color: #0d0f14;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 20px
+        }
+
+        /* Boton de solicitud de rol — resaltado */
+        .ni-rol {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 11px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 13.5px;
+            color: var(--accent);
+            border: 1px solid rgba(200, 169, 110, .25);
+            background: rgba(200, 169, 110, .07);
+            width: 100%;
+            text-align: left;
+            font-family: 'DM Sans', sans-serif;
+            transition: background .15s, border-color .15s;
+            margin-top: 6px
+        }
+
+        .ni-rol:hover {
+            background: rgba(200, 169, 110, .14);
+            border-color: var(--accent)
+        }
+
+        .sb-foot {
+            padding: 10px 8px 18px;
+            border-top: 1px solid var(--border)
+        }
+
+        .user-row {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 11px;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: background .15s
+        }
+
+        .user-row:hover {
+            background: var(--surface2)
+        }
+
+        .av {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--surface3);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0
+        }
+
+        .u-info {
+            flex: 1;
+            min-width: 0
+        }
+
+        .u-name {
+            font-size: 12.5px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .u-role {
+            font-size: 11px;
+            color: var(--muted)
+        }
+
+        /* ── MAIN ── */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 0
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 28px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            flex-shrink: 0
+        }
+
+        .tb-left h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 20px
+        }
+
+        .tb-left p {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 2px;
+            font-weight: 300
+        }
+
+        .tb-right {
+            display: flex;
+            gap: 8px;
+            align-items: center
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all .18s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500
+        }
+
+        .btn-o {
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted)
+        }
+
+        .btn-o:hover {
+            border-color: var(--accent);
+            color: var(--accent)
+        }
+
+        .btn-p {
+            border: none;
+            background: var(--accent);
+            color: #0d0f14;
+            font-weight: 600
+        }
+
+        .btn-p:hover {
+            background: var(--accent2)
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block;
+            animation: fadeIn .25s ease
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty-hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 64px 20px;
+            gap: 20px;
+            text-align: center
+        }
+
+        .empty-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--surface2);
+            border: 2px dashed var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 4px
+        }
+
+        .empty-hero h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 24px;
+            color: var(--text)
+        }
+
+        .empty-hero p {
+            font-size: 14px;
+            color: var(--muted);
+            max-width: 340px;
+            line-height: 1.7;
+            font-weight: 300
+        }
+
+        .empty-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 4px
+        }
+
+        /* ── SCHEDULE ── */
+        .sched-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface)
+        }
+
+        .sched-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 680px
+        }
+
+        .sched-table th {
+            padding: 12px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            text-align: center;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .sched-table th:first-child {
+            text-align: left;
+            padding-left: 16px;
+            width: 72px
+        }
+
+        .time-lbl {
+            padding: 0 8px 0 16px;
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 500;
+            border-right: 1px solid var(--border);
+            white-space: nowrap;
+            vertical-align: middle
+        }
+
+        .sc {
+            padding: 4px 5px;
+            vertical-align: top;
+            height: 64px;
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border)
+        }
+
+        .sc:last-child {
+            border-right: none
+        }
+
+        .blk {
+            border-radius: 7px;
+            padding: 6px 8px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2px
+        }
+
+        .blk-name {
+            font-size: 11.5px;
+            font-weight: 600;
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .blk-info {
+            font-size: 10px;
+            opacity: .75
+        }
+
+        /* ── CARDS ── */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px
+        }
+
+        .info-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px
+        }
+
+        .info-card .ic-label {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            font-weight: 500;
+            margin-bottom: 6px
+        }
+
+        .info-card .ic-value {
+            font-family: 'DM Serif Display', serif;
+            font-size: 26px;
+            line-height: 1
+        }
+
+        .info-card .ic-sub {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 4px
+        }
+
+        /* ── TABLE ── */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden
+        }
+
+        .table-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .table-head h3 {
+            font-size: 14px;
+            font-weight: 600
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse
+        }
+
+        thead th {
+            padding: 11px 14px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface)
+        }
+
+        tbody td {
+            padding: 11px 14px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none
+        }
+
+        tbody tr:hover {
+            background: var(--surface2)
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600
+        }
+
+        .badge-act {
+            background: rgba(112, 201, 160, .15);
+            color: var(--success)
+        }
+
+        .badge-pend {
+            background: rgba(220, 150, 80, .15);
+            color: #dc9650
+        }
+
+        .badge-inac {
+            background: rgba(224, 112, 112, .15);
+            color: var(--danger)
+        }
+
+        /* ── NOTIF ── */
+        .notif-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px
+        }
+
+        .notif-item {
+            display: flex;
+            gap: 12px;
+            padding: 13px 16px;
+            border-radius: 10px;
+            transition: background .15s
+        }
+
+        .notif-item:hover {
+            background: var(--surface2)
+        }
+
+        .notif-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+            margin-top: 5px
+        }
+
+        .notif-dot.read {
+            background: var(--border)
+        }
+
+        .notif-body {
+            flex: 1
+        }
+
+        .notif-msg {
+            font-size: 13px;
+            line-height: 1.5
+        }
+
+        .notif-time {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 2px
+        }
+
+        /* ── PERFIL ── */
+        .perfil-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 28px;
+            max-width: 480px
+        }
+
+        .perfil-av {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--surface3);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 18px
+        }
+
+        .perfil-name {
+            font-family: 'DM Serif Display', serif;
+            font-size: 24px;
+            margin-bottom: 4px
+        }
+
+        .perfil-role {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 22px
+        }
+
+        .perfil-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 11px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px
+        }
+
+        .perfil-row:last-child {
+            border-bottom: none
+        }
+
+        .perfil-row .lbl {
+            color: var(--muted);
+            font-size: 12px
+        }
+
+        .readonly-note {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 14px;
+            font-style: italic
+        }
+
+        /* ── MODAL ── */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(3px)
+        }
+
+        .overlay.open {
+            display: flex
+        }
+
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 460px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px;
+            animation: fadeIn .2s ease
+        }
+
+        .modal h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 22px;
+            margin-bottom: 4px
+        }
+
+        .modal .sub {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 22px;
+            line-height: 1.6
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            margin-bottom: 16px
+        }
+
+        .field label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .07em
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 11px 14px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            color: var(--text);
+            outline: none;
+            transition: border-color .18s;
+            -webkit-appearance: none;
+            appearance: none
+        }
+
+        .field select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7d8a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px
+        }
+
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus {
+            border-color: var(--accent)
+        }
+
+        .modal-foot {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid var(--border)
+        }
+
+        .info-box {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 12px 14px;
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.6;
+            margin-bottom: 16px
+        }
+
+        .info-box strong {
+            color: var(--text)
+        }
+
+        /* ── SEARCH BOX ── */
+        .search-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 7px 12px
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            width: 200px
+        }
+
+        /* ── WEEK NAV ── */
+        .week-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px
+        }
+
+        .week-label {
+            font-size: 13px;
+            color: var(--text);
+            font-weight: 500;
+            min-width: 200px;
+            text-align: center
+        }
+
+        .week-btn {
+            width: 30px;
+            height: 30px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--muted);
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .2s
+        }
+
+        .week-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent)
+        }
+
+        .sec-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px
+        }
+
+        .sec-row h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 18px
+        }
+
+        .sec-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 18px;
+            margin-bottom: 16px
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px
+        }
+
+        /* grupo join result */
+        .grupo-result {
+            display: none;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 12px
+        }
+
+        .grupo-result.show {
+            display: block
+        }
+
+        .grupo-result h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px
+        }
+
+        .grupo-result p {
+            font-size: 12px;
+            color: var(--muted)
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ═══════════ SIDEBAR ═══════════ -->
+    <aside class="sb">
+        <div class="sb-brand">
+            <div class="sb-logo">H</div>
+            <span class="sb-name">Horarios</span>
+        </div>
+
+        <nav class="sb-nav">
+            <span class="sb-label">General</span>
+            <button class="ni active" onclick="go('inicio',this)">
+                <span class="ni-ic">▦</span> Inicio
+            </button>
+            <button class="ni" onclick="go('horario',this)">
+                <span class="ni-ic">▤</span> Mi Horario
+            </button>
+
+            <span class="sb-label">Mi Grupo</span>
+            <button class="ni" onclick="go('grupo',this)">
+                <span class="ni-ic">◻</span> Mi Grupo
+            </button>
+            <button class="ni" onclick="go('compañeros',this)">
+                <span class="ni-ic">◻</span> Compañeros
+            </button>
+
+            <span class="sb-label">Cuenta</span>
+            <button class="ni" onclick="go('notificaciones',this)">
+                <span class="ni-ic">◻</span> Notificaciones
+                <span class="nb" id="notif-badge">2</span>
+            </button>
+            <button class="ni" onclick="go('perfil',this)">
+                <span class="ni-ic">◻</span> Mi Perfil
+            </button>
+
+            <!-- Boton especial: solicitar rol -->
+            <button class="ni-rol" onclick="openModal('modal-rol')">
+                <span class="ni-ic">&#9650;</span> Solicitar rol
+            </button>
+        </nav>
+
+        <div class="sb-foot">
+            <div class="user-row" onclick="go('perfil',null)">
+                <div class="av" id="sb-av">JD</div>
+                <div class="u-info">
+                    <!-- TODO: cargar desde sessionStorage o backend -->
+                    <div class="u-name" id="sb-name">Juan Doe</div>
+                    <div class="u-role">Estudiante</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ═══════════ MAIN ═══════════ -->
+    <div class="main">
+        <div class="topbar">
+            <div class="tb-left">
+                <h1 id="tb-title">Inicio</h1>
+                <p id="tb-sub">Bienvenido a tu panel</p>
+            </div>
+            <div class="tb-right" id="tb-actions">
+                <button class="btn btn-o" onclick="openModal('modal-grupo-buscar')">Unirse a un grupo</button>
+            </div>
+        </div>
+
+        <div class="content">
+
+            <!-- ══ INICIO ══ -->
+            <div class="panel active" id="panel-inicio">
+
+                <!-- Estado: SIN GRUPO (se muestra por defecto la primera vez) -->
+                <div id="estado-sin-grupo">
+                    <div class="empty-hero">
+                        <div class="empty-circle">&#128197;</div>
+                        <h2>No te has unido a ningun grupo</h2>
+                        <p>Para ver tu horario necesitas unirte al grupo de tu ficha o salon. Busca tu grupo por nombre
+                            o codigo y envia una solicitud.</p>
+                        <div class="empty-actions">
+                            <button class="btn btn-p" onclick="openModal('modal-grupo-buscar')">Buscar grupo</button>
+                            <button id="btn-solicitar-rol" class="btn btn-o" onclick="openModal('modal-rol')">Solicitar
+                                rol diferente</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estado: CON GRUPO (oculto hasta que se una a uno) -->
+                <div id="estado-con-grupo" style="display:none">
+                    <div class="cards-grid">
+                        <div class="info-card">
+                            <div class="ic-label">Mi grupo</div>
+                            <div class="ic-value" id="home-grupo-nombre">3141033</div>
+                            <div class="ic-sub">Programacion cloud</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="ic-label">Clases hoy</div>
+                            <div class="ic-value">2</div>
+                            <div class="ic-sub">Proxima: 10:00 am</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="ic-label">Compañeros</div>
+                            <div class="ic-value">18</div>
+                            <div class="ic-sub">En tu grupo</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="ic-label">Notificaciones</div>
+                            <div class="ic-value">2</div>
+                            <div class="ic-sub">Sin leer</div>
+                        </div>
+                    </div>
+
+                    <div class="table-wrap">
+                        <div class="table-head">
+                            <h3>Clases de hoy</h3>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Materia</th>
+                                    <th>Hora</th>
+                                    <th>Salon</th>
+                                    <th>Profesor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Bases de Datos</td>
+                                    <td>07:00 – 10:00</td>
+                                    <td>Sala 204</td>
+                                    <td>Laura Martinez</td>
+                                </tr>
+                                <tr>
+                                    <td>Redes</td>
+                                    <td>10:00 – 13:00</td>
+                                    <td>Lab 101</td>
+                                    <td>Pedro Suarez</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ══ HORARIO ══ -->
+            <div class="panel" id="panel-horario">
+
+                <!-- Sin grupo -->
+                <div id="horario-sin-grupo">
+                    <div class="empty-hero">
+                        <div class="empty-circle">&#128197;</div>
+                        <h2>Aun no tienes horario</h2>
+                        <p>Tu horario aparece aqui una vez que te unas a un grupo y el administrador lo haya asignado.
+                        </p>
+                        <div class="empty-actions">
+                            <button class="btn btn-p" onclick="openModal('modal-grupo-buscar')">Buscar grupo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Con grupo -->
+                <div id="horario-con-grupo" style="display:none">
+                    <div class="week-nav">
+                        <button class="week-btn" onclick="changeWeek(-1)">&#8249;</button>
+                        <span class="week-label" id="week-label">Semana del 3 al 7 de marzo, 2026</span>
+                        <button class="week-btn" onclick="changeWeek(1)">&#8250;</button>
+                    </div>
+                    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Solo lectura — el administrador
+                        gestiona los horarios.</p>
+                    <div class="sched-wrap">
+                        <table class="sched-table">
+                            <thead id="sched-head"></thead>
+                            <tbody id="sched-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ══ MI GRUPO ══ -->
+            <div class="panel" id="panel-grupo">
+
+                <div id="grupo-sin-grupo">
+                    <div class="empty-hero">
+                        <div class="empty-circle">&#128101;</div>
+                        <h2>No perteneces a ningun grupo</h2>
+                        <p>Unete a tu ficha o salon para ver la informacion del grupo, los integrantes y el horario
+                            asignado.</p>
+                        <div class="empty-actions">
+                            <button class="btn btn-p" onclick="openModal('modal-grupo-buscar')">Buscar grupo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="grupo-con-grupo" style="display:none">
+                    <div class="sec-row">
+                        <h2 id="grupo-titulo">Grupo 3141033</h2>
+                        <button class="btn btn-o" style="color:var(--danger);border-color:rgba(224,112,112,.3)"
+                            onclick="salirGrupo()">Salir del grupo</button>
+                    </div>
+                    <div class="table-wrap" style="margin-bottom:18px">
+                        <div class="notif-list" style="padding:6px 0">
+                            <div class="notif-item" style="flex-direction:column;gap:4px">
+                                <div
+                                    style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600">
+                                    Descripcion</div>
+                                <div id="grupo-desc" style="font-size:13px">Programacion de aplicaciones y servicios
+                                    para la nube — SENA ficha 3141033</div>
+                            </div>
+                            <div class="notif-item" style="flex-direction:column;gap:4px">
+                                <div
+                                    style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600">
+                                    Profesor asignado</div>
+                                <div style="font-size:13px">Laura Martinez</div>
+                            </div>
+                            <div class="notif-item" style="flex-direction:column;gap:4px">
+                                <div
+                                    style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600">
+                                    Miembros</div>
+                                <div style="font-size:13px">18 estudiantes</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ══ COMPANEROS ══ -->
+            <div class="panel" id="panel-compañeros">
+
+                <div id="comp-sin-grupo">
+                    <div class="empty-hero">
+                        <div class="empty-circle">&#128101;</div>
+                        <h2>Sin compañeros aun</h2>
+                        <p>Unete a un grupo para ver a los demas integrantes.</p>
+                        <div class="empty-actions">
+                            <button class="btn btn-p" onclick="openModal('modal-grupo-buscar')">Buscar grupo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="comp-con-grupo" style="display:none">
+                    <div class="sec-row">
+                        <h2>Compañeros</h2>
+                        <div class="search-box"><input id="comp-search" placeholder="Buscar compañero..."
+                                oninput="filterTable('comp-tbody','comp-search')" /></div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Nickname</th>
+                                    <th>Correo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comp-tbody">
+                                <tr>
+                                    <td>Laura Martinez</td>
+                                    <td>laura_m</td>
+                                    <td>laura@sena.co</td>
+                                </tr>
+                                <tr>
+                                    <td>Carlos Ramos</td>
+                                    <td>carlos_r</td>
+                                    <td>carlos@correo.co</td>
+                                </tr>
+                                <tr>
+                                    <td>Sofia Torres</td>
+                                    <td>sofia_t</td>
+                                    <td>sofia@correo.co</td>
+                                </tr>
+                                <tr>
+                                    <td>Ana Jimenez</td>
+                                    <td>ana_j</td>
+                                    <td>ana@correo.co</td>
+                                </tr>
+                                <tr>
+                                    <td>Miguel Perez</td>
+                                    <td>miguel_p</td>
+                                    <td>miguel@correo.co</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ══ NOTIFICACIONES ══ -->
+            <div class="panel" id="panel-notificaciones">
+                <div class="sec-row">
+                    <h2>Notificaciones</h2>
+                    <button class="btn btn-o" onclick="markAllRead()">Marcar leidas</button>
+                </div>
+                <div class="table-wrap">
+                    <div class="notif-list" id="notif-list" style="padding:6px 0">
+                        <div class="notif-item"><span class="notif-dot"></span>
+                            <div class="notif-body">
+                                <div class="notif-msg">El administrador actualizo el horario del grupo
+                                    <strong>3141033</strong>
+                                </div>
+                                <div class="notif-time">Hace 30 min</div>
+                            </div>
+                        </div>
+                        <div class="notif-item"><span class="notif-dot"></span>
+                            <div class="notif-body">
+                                <div class="notif-msg">Tu solicitud para unirte al grupo <strong>3141033</strong> fue
+                                    aprobada</div>
+                                <div class="notif-time">Hace 2 horas</div>
+                            </div>
+                        </div>
+                        <div class="notif-item"><span class="notif-dot read"></span>
+                            <div class="notif-body">
+                                <div class="notif-msg">Bienvenido a la plataforma de gestion de horarios</div>
+                                <div class="notif-time">Ayer</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ PERFIL ══ -->
+            <div class="panel" id="panel-perfil">
+                <h2 class="sec-title">Mi Perfil</h2>
+                <div class="perfil-card">
+                    <div class="perfil-av" id="perfil-av">JD</div>
+                    <div class="perfil-name" id="perfil-name">Juan Doe</div>
+                    <div class="perfil-role">Estudiante</div>
+
+                    <div class="perfil-row"><span class="lbl">Nickname</span><span id="perfil-nick">juan_doe</span>
+                    </div>
+                    <div class="perfil-row"><span class="lbl">Correo</span><span
+                            id="perfil-correo">juan@correo.co</span></div>
+                    <div class="perfil-row"><span class="lbl">Grupo actual</span><span id="perfil-grupo">Sin
+                            grupo</span></div>
+                    <div class="perfil-row"><span class="lbl">Rol</span><span><span
+                                class="badge badge-act">Estudiante</span></span></div>
+                    <div class="perfil-row"><span class="lbl">Miembro desde</span><span id="perfil-fecha">Marzo
+                            2026</span></div>
+
+                    <p class="readonly-note">Para cambiar tu correo o contrasena contacta al administrador, o solicita
+                        un rol diferente desde el sidebar.</p>
+                </div>
+            </div>
+
+        </div><!-- /content -->
+    </div><!-- /main -->
+
+    <!-- ═══════════ MODALS ═══════════ -->
+
+    <!-- MODAL: Buscar y unirse a grupo -->
+    <div class="overlay" id="modal-grupo-buscar">
+        <div class="modal">
+            <h2>Buscar grupo</h2>
+            <p class="sub">Ingresa el nombre o codigo de tu ficha / salon para encontrar tu grupo.</p>
+
+            <div class="field">
+                <label>Nombre o codigo del grupo</label>
+                <input id="buscar-input" placeholder="Ej: 3141033 o Col-Manana" oninput="buscarGrupo()" />
+            </div>
+
+            <div class="grupo-result" id="grupo-result">
+                <h4 id="result-nombre">3141033</h4>
+                <p id="result-desc">Programacion cloud — SENA</p>
+                <p style="margin-top:6px;font-size:11px;color:var(--muted)">18 miembros</p>
+            </div>
+
+            <div class="modal-foot">
+                <button class="btn btn-o" onclick="closeModal('modal-grupo-buscar')">Cancelar</button>
+                <button class="btn btn-p" id="btn-unirse" style="display:none" onclick="unirseGrupo()">Solicitar
+                    union</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Solicitar rol -->
+    <div class="overlay" id="modal-rol">
+        <div class="modal">
+            <h2>Solicitar cambio de rol</h2>
+            <p class="sub">Puedes solicitar ser <strong>Profesor</strong> o <strong>Administrador</strong>. El
+                administrador revisara tu solicitud y la aprobara o rechazara.</p>
+
+            <div class="info-box">
+                Tu rol actual es <strong>Estudiante</strong>. Solo puedes tener una solicitud pendiente a la vez.
+            </div>
+
+            <div class="field">
+                <label>Rol solicitado</label>
+                <select id="rol-solicitado">
+                    <option value="">Selecciona un rol...</option>
+                    <option value="2">Profesor / Instructor</option>
+                    <option value="1">Administrador</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Motivo (opcional)</label>
+                <textarea id="rol-motivo" rows="3"
+                    placeholder="Explica brevemente por que solicitas este rol..."></textarea>
+            </div>
+
+            <div class="modal-foot">
+                <button class="btn btn-o" onclick="closeModal('modal-rol')">Cancelar</button>
+                <button class="btn btn-p" onclick="enviarSolicitudRol()">Enviar solicitud</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Confirmacion salir grupo -->
+    <div class="overlay" id="modal-salir">
+        <div class="modal">
+            <h2>Salir del grupo</h2>
+            <p class="sub">Si sales del grupo ya no podras ver su horario ni a sus integrantes. Podras unirte de nuevo
+                enviando una nueva solicitud.</p>
+            <div class="modal-foot">
+                <button class="btn btn-o" onclick="closeModal('modal-salir')">Cancelar</button>
+                <button class="btn" style="border:none;background:var(--danger);color:#fff"
+                    onclick="confirmarSalir()">Si, salir</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ══════════════════════════════════
+           ESTADO (simulado — reemplazar con
+           sessionStorage / fetch al backend)
+        ══════════════════════════════════ */
+        let enGrupo = false; // cambia a true al unirse
+
+        // TODO: al cargar la pagina, hacer:
+        // const token  = sessionStorage.getItem('token');
+        // const nombre = sessionStorage.getItem('nombre') || 'Usuario';
+        // fetch('/api/me', { headers: { Authorization: 'Bearer ' + token } })
+        // .then(r => r.json()).then(data => initUser(data));
+
+        function initUser(data) {
+            // Pone nombre en sidebar y perfil
+            const iniciales = (data.Nombre[0] || '') + (data.Apellido[0] || '');
+            document.getElementById('sb-av').textContent = iniciales;
+            document.getElementById('sb-name').textContent = data.Nombre + ' ' + data.Apellido;
+            document.getElementById('perfil-av').textContent = iniciales;
+            document.getElementById('perfil-name').textContent = data.Nombre + ' ' + data.Apellido;
+            document.getElementById('perfil-nick').textContent = data.nickname;
+            document.getElementById('perfil-correo').textContent = data.correo;
+            if (data.grupo) {
+                enGrupo = true;
+                setGrupoState(true, data.grupo);
+            }
+        }
+
+        // Demo: activa con datos ficticios para probar la UI
+        // initUser({ Nombre:'Juan', Apellido:'Doe', nickname:'juan_doe', correo:'juan@correo.co', grupo:null });
+
+        /* ══════════════════════════════════
+           NAVEGACION
+        ══════════════════════════════════ */
+        const panelMeta = {
+            inicio: { title: 'Inicio', sub: 'Tu panel de bienvenida' },
+            horario: { title: 'Mi Horario', sub: 'Vista de solo lectura' },
+            grupo: { title: 'Mi Grupo', sub: 'Informacion de tu ficha o salon' },
+            compañeros: { title: 'Companeros', sub: 'Integrantes de tu grupo' },
+            notificaciones: { title: 'Notificaciones', sub: 'Mensajes del sistema' },
+            perfil: { title: 'Mi Perfil', sub: 'Informacion de tu cuenta' },
+        };
+
+        function go(name, btn) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+            document.getElementById('panel-' + name).classList.add('active');
+            if (btn) btn.classList.add('active');
+
+            const m = panelMeta[name] || { title: name, sub: '' };
+            document.getElementById('tb-title').textContent = m.title;
+            document.getElementById('tb-sub').textContent = m.sub;
+
+            // boton topbar
+            const tbActions = document.getElementById('tb-actions');
+            if (name === 'inicio' && !enGrupo) {
+                tbActions.innerHTML = '<button class="btn btn-o" onclick="openModal(\'modal-grupo-buscar\')">Unirse a un grupo</button>';
+            } else if (name === 'horario' && enGrupo) {
+                tbActions.innerHTML = '';
+            } else {
+                tbActions.innerHTML = '';
+            }
+
+            if (name === 'notificaciones') {
+                const b = document.getElementById('notif-badge');
+                if (b) b.remove();
+            }
+
+            if (name === 'horario' && enGrupo) renderSched();
+        }
+
+        /* ══════════════════════════════════
+           ESTADO DE GRUPO
+        ══════════════════════════════════ */
+        function setGrupoState(tiene, grupo) {
+            enGrupo = tiene;
+
+            // Inicio
+            document.getElementById('estado-sin-grupo').style.display = tiene ? 'none' : 'block';
+            document.getElementById('estado-con-grupo').style.display = tiene ? 'block' : 'none';
+
+            // Horario
+            document.getElementById('horario-sin-grupo').style.display = tiene ? 'none' : 'block';
+            document.getElementById('horario-con-grupo').style.display = tiene ? 'block' : 'none';
+
+            // Grupo
+            document.getElementById('grupo-sin-grupo').style.display = tiene ? 'none' : 'block';
+            document.getElementById('grupo-con-grupo').style.display = tiene ? 'block' : 'none';
+
+            // Compañeros
+            document.getElementById('comp-sin-grupo').style.display = tiene ? 'none' : 'block';
+            document.getElementById('comp-con-grupo').style.display = tiene ? 'block' : 'none';
+
+            if (tiene && grupo) {
+                document.getElementById('home-grupo-nombre').textContent = grupo.nombre || grupo;
+                document.getElementById('grupo-titulo').textContent = 'Grupo ' + (grupo.nombre || grupo);
+                document.getElementById('grupo-desc').textContent = grupo.descripcion || 'Sin descripcion';
+                document.getElementById('perfil-grupo').textContent = grupo.nombre || grupo;
+            } else {
+                document.getElementById('perfil-grupo').textContent = 'Sin grupo';
+            }
+        }
+
+        /* ══════════════════════════════════
+           BUSCAR GRUPO
+        ══════════════════════════════════ */
+        // Grupos de ejemplo — TODO: reemplazar con fetch('/api/grupos?q=...')
+        const gruposDemo = [
+            { nombre: '3141033', descripcion: 'Programacion cloud — SENA', miembros: 18 },
+            { nombre: '3141034', descripcion: 'Diseno grafico — SENA', miembros: 22 },
+            { nombre: 'Col-Manana', descripcion: 'Colegio jornada manana', miembros: 35 },
+            { nombre: 'Col-Tarde', descripcion: 'Colegio jornada tarde', miembros: 30 },
+        ];
+
+        function buscarGrupo() {
+            const q = document.getElementById('buscar-input').value.trim().toLowerCase();
+            const result = document.getElementById('grupo-result');
+            const btnUnirse = document.getElementById('btn-unirse');
+
+            if (q.length < 2) { result.classList.remove('show'); btnUnirse.style.display = 'none'; return; }
+
+            const found = gruposDemo.find(g => g.nombre.toLowerCase().includes(q));
+            if (found) {
+                document.getElementById('result-nombre').textContent = found.nombre;
+                document.getElementById('result-desc').textContent = found.descripcion + ' · ' + found.miembros + ' miembros';
+                result.classList.add('show');
+                btnUnirse.style.display = 'flex';
+                btnUnirse.dataset.grupo = found.nombre;
+            } else {
+                result.classList.remove('show');
+                btnUnirse.style.display = 'none';
+            }
+        }
+
+        function unirseGrupo() {
+            const nombre = document.getElementById('btn-unirse').dataset.grupo;
+
+            // TODO: POST /api/grupos/:id/solicitud
+            // fetch('/api/grupos/' + nombre + '/solicitud', { method:'POST', ... })
+
+            closeModal('modal-grupo-buscar');
+            // Simulacion: unirse directo (en produccion esperaria aprobacion del admin)
+            setGrupoState(true, { nombre, descripcion: document.getElementById('result-desc').textContent });
+            renderSched();
+            alert('Solicitud enviada. En produccion el admin debe aprobarla antes de que puedas ver el horario.');
+        }
+
+        function salirGrupo() { openModal('modal-salir'); }
+
+        function confirmarSalir() {
+            setGrupoState(false, null);
+            closeModal('modal-salir');
+            // TODO: DELETE /api/grupos/:id/miembro
+        }
+
+        /* ══════════════════════════════════
+           SOLICITAR ROL
+        ══════════════════════════════════ */
+        function enviarSolicitudRol() {
+            const rol = document.getElementById('rol-solicitado').value;
+            if (!rol) { alert('Selecciona un rol.'); return; }
+
+            const motivo = document.getElementById('rol-motivo').value.trim();
+            const payload = { rol_solicitado_id: rol, motivo };
+
+            // TODO: POST /api/solicitudes-rol
+            // fetch('/api/solicitudes-rol', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+
+            closeModal('modal-rol');
+            alert('Solicitud enviada. El administrador la revisara pronto.');
+        }
+
+        /* ══════════════════════════════════
+           HORARIO (solo lectura)
+        ══════════════════════════════════ */
+        const COLORS = { c0: '#c8a96e', c1: '#64a0dc', c2: '#78c88c', c3: '#c878b4', c4: '#dc9664', c5: '#a08cdc', c6: '#60c8c0', c7: '#e0b060' };
+        const DIAS = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+        const DIAS_LABEL = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
+
+        // Datos de ejemplo — TODO: reemplazar con fetch('/api/horarios?grupo=...')
+        const clases = [
+            { dia: 'lunes', hora_inicio: '07:00', hora_fin: '10:00', nombre: 'Bases de Datos', salon: 'Sala 204', color: 'c0' },
+            { dia: 'lunes', hora_inicio: '10:00', hora_fin: '13:00', nombre: 'Redes', salon: 'Lab 101', color: 'c1' },
+            { dia: 'martes', hora_inicio: '07:00', hora_fin: '10:00', nombre: 'Programacion Web', salon: 'Lab 103', color: 'c2' },
+            { dia: 'miercoles', hora_inicio: '07:00', hora_fin: '10:00', nombre: 'Cloud Computing', salon: 'Lab 202', color: 'c4' },
+            { dia: 'jueves', hora_inicio: '07:00', hora_fin: '10:00', nombre: 'Seguridad Informatica', salon: 'Sala 301', color: 'c5' },
+            { dia: 'viernes', hora_inicio: '07:00', hora_fin: '10:00', nombre: 'Proyecto Integrador', salon: 'Sala 204', color: 'c6' },
+        ];
+
+        let weekOffset = 0;
+
+        function renderSched() {
+            const horas = [];
+            for (let h = 6; h < 20; h++) horas.push(String(h).padStart(2, '0') + ':00');
+
+            const head = document.getElementById('sched-head');
+            const body = document.getElementById('sched-body');
+            head.innerHTML = '<tr><th>Hora</th>' + DIAS_LABEL.map(d => '<th>' + d + '</th>').join('') + '</tr>';
+
+            const occ = {};
+            body.innerHTML = '';
+
+            horas.forEach(hora => {
+                const tr = document.createElement('tr');
+                const td0 = document.createElement('td');
+                td0.className = 'time-lbl'; td0.textContent = hora;
+                tr.appendChild(td0);
+
+                DIAS.forEach(dia => {
+                    const key = dia + '-' + hora;
+                    if (occ[key]) return;
+                    const b = clases.find(c => c.dia === dia && c.hora_inicio === hora);
+                    const td = document.createElement('td');
+                    td.className = 'sc';
+
+                    if (b) {
+                        const [sh] = b.hora_inicio.split(':').map(Number);
+                        const [eh] = b.hora_fin.split(':').map(Number);
+                        const span = eh - sh;
+                        td.rowSpan = span;
+                        for (let i = 1; i < span; i++) occ[dia + '-' + String(sh + i).padStart(2, '0') + ':00'] = true;
+
+                        const col = COLORS[b.color] || COLORS.c0;
+                        td.innerHTML = '<div class="blk" style="background:' + col + '28;border-left:3px solid ' + col + ';color:' + col + '">'
+                            + '<span class="blk-name">' + b.nombre + '</span>'
+                            + '<span class="blk-info">&#128205; ' + b.salon + ' &bull; ' + b.hora_inicio + '&ndash;' + b.hora_fin + '</span>'
+                            + '</div>';
+                    }
+                    tr.appendChild(td);
+                });
+                body.appendChild(tr);
+            });
+        }
+
+        function changeWeek(dir) {
+            weekOffset += dir;
+            const now = new Date();
+            const day = now.getDay();
+            const diff = day === 0 ? -6 : 1 - day;
+            const monday = new Date(now);
+            monday.setDate(now.getDate() + diff + weekOffset * 7);
+            const friday = new Date(monday);
+            friday.setDate(monday.getDate() + 4);
+            const mStr = monday.toLocaleDateString('es-CO', { day: 'numeric', month: 'long' });
+            const fStr = friday.toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
+            document.getElementById('week-label').textContent = 'Semana del ' + mStr + ' al ' + fStr;
+            // TODO: fetch('/api/horarios?grupo=...&semana=' + weekOffset)
+        }
+
+        /* ══════════════════════════════════
+           UTILIDADES
+        ══════════════════════════════════ */
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        document.querySelectorAll('.overlay').forEach(o => {
+            o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+        });
+
+        function markAllRead() {
+            document.querySelectorAll('.notif-dot').forEach(d => d.classList.add('read'));
+        }
+
+        function filterTable(tbodyId, inputId) {
+            const q = document.getElementById(inputId).value.toLowerCase();
+            document.querySelectorAll('#' + tbodyId + ' tr').forEach(tr => {
+                tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        }
+
+        // Inicializar semana label
+        changeWeek(0);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnSolicitar = document.getElementById('btn-solicitar-rol');
+
+            if (btnSolicitar) {
+                btnSolicitar.addEventListener('click', async () => {
+                    // 1. Preguntamos al usuario (puedes usar un prompt sencillo por ahora)
+                    const seleccion = prompt("Elige el ID del rol que deseas:\n3 - Profesor\n1 - Administrador");
+
+                    // Validamos que el usuario no haya cancelado
+                    if (seleccion) {
+                        // 2. Enviamos los datos al PHP
+                        try {
+                            const resp = await fetch('api/v1/solicitudes/crear.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ rol_id: seleccion })
+                            });
+
+                            const data = await resp.json();
+
+                            if (data.success) {
+                                alert("¡Enviado! " + data.message);
+                            } else {
+                                alert("Ups: " + data.message);
+                            }
+                        } catch (error) {
+                            console.error("Error al conectar:", error);
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
