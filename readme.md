@@ -1,5 +1,62 @@
-#Yoo, im finn, im ill be helping ya to deploy this project properly, yk what i mean?, first, u need to see all the files allowed for you, same for the entires archives, api, cofig(), u need to open the config.php first to configure the whole system, if you cant connect the database properly u need to change the port, the default port is 3306 if you cant do shit with it, change it to 3307, you can start from there, you can also check the database if you want to change it, PLEASE, MAKE A COPY OF THE ENTIRE PROJECT BEFORE U MODIFY MY SHIT.
+## Schedule Manager
 
-#My bad, im not that rude, lol. but here is the tutorial. First, u need to install xampp control panel and activate Apache, same with MySQL, you also need to install MySQL workbech
+Sup yall, I'm Finn 
+I'll guide you through how to run and configure this project properly.
 
-// UPDATE SOON //
+## Before You Start
+
+Make a **copy of the entire project** before modifying anything.
+This way you can restore the original files if something breaks.
+
+## Requirements
+
+To run this project you need to install:
+
+* XAMPP Control Panel
+* MySQL Workbench
+
+After installing **XAMPP**, start the following services:
+
+* Apache
+* MySQL
+
+## Project Setup
+
+1. Open the project folder.
+2. Go to the `config` directory.
+3. Open the file:
+
+```
+config.php
+```
+
+This file contains the configuration for the whole system.
+
+## Database Configuration
+
+If the database does not connect properly, check the **port configuration**.
+
+Default MySQL port:
+
+```
+3306
+```
+
+If that port does not work, try changing it to:
+
+```
+3307
+```
+
+You can also modify the database settings in the configuration file if needed.
+
+## Notes
+
+* Do not modify important files unless you understand what they do.
+* Always keep a backup of the project before making changes.
+
+---
+
+More detailed setup instructions will be added soon.
+
+**// UPDATE SOON //**
