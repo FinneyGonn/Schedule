@@ -59,4 +59,6 @@ You can also modify the database settings in the configuration file if needed.
 
 More detailed setup instructions will be added soon.
 
+Also, you need to see the files in /api/v1/../.. there all the information about the backend related to stats, acticity, etc
+
 **// UPDATE SOON //**
