@@ -596,20 +596,28 @@
             const formData = new FormData();
             formData.append('correo', correo);
             formData.append('contrasena', contrasena);
-
             fetch('api/login.php', {
                 method: 'POST',
                 body: formData
             })
                 .then(res => res.json())
                 .then(data => {
+                    console.log("DATA:", data);
+                    console.log("ROL:", data.datos?.rol_id);
+
                     if (data.ok) {
                         showAlert('login-success', 'Bienvenido, redirigiendo...');
+
                         localStorage.setItem('user', JSON.stringify(data.datos));
+
                         setTimeout(() => {
-                            // Redirección basada en el rol que devuelve tu PHP
-                            window.location.href = (data.rol_id == 1) ? 'admin.html' : 'user.html';
+                            const rol = parseInt(data.datos?.rol_id);
+
+                            window.location.href = (rol === 1)
+                                ? 'admin.html'
+                                : 'user.html';
                         }, 800);
+
                     } else {
                         showAlert('login-error', data.mensaje || 'Credenciales incorrectas.');
                     }
@@ -618,54 +626,54 @@
                     console.error(err);
                     showAlert('login-error', 'Error al conectar con el servidor.');
                 });
-        }
 
-        // --- Lógica de Registro ---
-        function handleRegister() {
-            clearAlerts();
-            const nombre = document.getElementById('reg-nombre').value.trim();
-            const apellido = document.getElementById('reg-apellido').value.trim();
-            const nickname = document.getElementById('reg-nickname').value.trim();
-            const correo = document.getElementById('reg-correo').value.trim();
-            const contrasena = document.getElementById('reg-pass').value;
-            const confirmar = document.getElementById('reg-confirm').value;
+            // --- Lógica de Registro ---
+            function handleRegister() {
+                clearAlerts();
+                const nombre = document.getElementById('reg-nombre').value.trim();
+                const apellido = document.getElementById('reg-apellido').value.trim();
+                const nickname = document.getElementById('reg-nickname').value.trim();
+                const correo = document.getElementById('reg-correo').value.trim();
+                const contrasena = document.getElementById('reg-pass').value;
+                const confirmar = document.getElementById('reg-confirm').value;
 
-            // Validaciones
-            if (!nombre || !apellido || !nickname || !correo || !contrasena || !confirmar) {
-                showAlert('reg-error', 'Por favor completa todos los campos.');
-                return;
-            }
+                // Validaciones
+                if (!nombre || !apellido || !nickname || !correo || !contrasena || !confirmar) {
+                    showAlert('reg-error', 'Por favor completa todos los campos.');
+                    return;
+                }
 
-            if (contrasena !== confirmar) {
-                showAlert('reg-error', 'Las contraseñas no coinciden.');
-                return;
-            }
+                if (contrasena !== confirmar) {
+                    showAlert('reg-error', 'Las contraseñas no coinciden.');
+                    return;
+                }
 
-            const formData = new FormData();
-            // Estos nombres deben coincidir con $_POST['nombre'], etc., en tu PHP
-            formData.append('nombre', nombre);
-            formData.append('apellido', apellido);
-            formData.append('nickname', nickname);
-            formData.append('correo', correo);
-            formData.append('contrasena', contrasena);
+                const formData = new FormData();
+                // Estos nombres deben coincidir con $_POST['nombre'], etc., en tu PHP
+                formData.append('nombre', nombre);
+                formData.append('apellido', apellido);
+                formData.append('nickname', nickname);
+                formData.append('correo', correo);
+                formData.append('contrasena', contrasena);
 
-            fetch('api/register.php', {
-                method: 'POST',
-                body: formData
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.ok) {
-                        alert('¡Cuenta creada exitosamente!');
-                        switchTab('login'); // Te manda a la pestaña de login
-                    } else {
-                        showAlert('reg-error', data.mensaje || 'Error al registrar.');
-                    }
+                fetch('api/register.php', {
+                    method: 'POST',
+                    body: formData
                 })
-                .catch(err => {
-                    console.error(err);
-                    showAlert('reg-error', 'Error al conectar con el servidor.');
-                });
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.ok) {
+                            alert('¡Cuenta creada exitosamente!');
+                            switchTab('login'); // Te manda a la pestaña de login
+                        } else {
+                            showAlert('reg-error', data.mensaje || 'Error al registrar.');
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        showAlert('reg-error', 'Error al conectar con el servidor.');
+                    });
+            }
         }
     </script>
 
