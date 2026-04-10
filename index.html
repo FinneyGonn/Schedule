@@ -584,7 +584,6 @@
         // --- Lógica de Inicio de Sesión ---
         function handleLogin() {
             clearAlerts();
-            // Nota: 'login-nickname' es el ID de tu input de correo
             const correo = document.getElementById('login-nickname').value.trim();
             const contrasena = document.getElementById('login-pass').value;
 
@@ -607,20 +606,16 @@
 
                     if (data.ok) {
                         showAlert('login-success', 'Bienvenido, redirigiendo...');
-
-                        // Guardamos los datos que vienen en la llave 'datos' de tu PHP
                         localStorage.setItem('user', JSON.stringify(data.datos));
 
                         setTimeout(() => {
                             const rol = parseInt(data.datos?.rol_id);
-                            // Redirección basada en el rol_id
                             if (rol === 1) {
                                 window.location.href = 'admin.php';
                             } else {
-                                window.location.href = 'user.html'; // O index.php según tu proyecto
+                                window.location.href = 'user.html';
                             }
                         }, 800);
-
                     } else {
                         showAlert('login-error', data.mensaje || 'Credenciales incorrectas.');
                     }
@@ -629,9 +624,9 @@
                     console.error("Error Fetch:", err);
                     showAlert('login-error', 'Error al conectar con el servidor.');
                 });
-        }
+        } // <--- AQUÍ ESTABA EL ERROR, FALTABA ESTA LLAVE
 
-        // --- Lógica de Registro (FUERA de handleLogin) ---
+        // --- Lógica de Registro ---
         function handleRegister() {
             clearAlerts();
             const nombre = document.getElementById('reg-nombre').value.trim();
@@ -658,7 +653,6 @@
             formData.append('correo', correo);
             formData.append('contrasena', contrasena);
 
-            // Ajustamos la ruta a tu estructura actual
             fetch('api/register.php', {
                 method: 'POST',
                 body: formData
@@ -678,7 +672,6 @@
                 });
         }
     </script>
-
 </body>
 
 </html>
