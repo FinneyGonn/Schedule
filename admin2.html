@@ -37,7 +37,7 @@
             --c4: #dc9664;
             --c5: #a08cdc;
             --c6: #60c8c0;
-            --c7: #e0b060;
+            --c7: #e0b060
         }
 
         html,
@@ -53,7 +53,7 @@
             background: var(--bg)
         }
 
-        /* ── SIDEBAR ── */
+        /* SIDEBAR */
         .sb {
             width: var(--sw);
             min-height: 100vh;
@@ -202,7 +202,7 @@
             color: var(--muted)
         }
 
-        /* ── MAIN ── */
+        /* MAIN */
         .main {
             flex: 1;
             display: flex;
@@ -275,10 +275,9 @@
         }
 
         .btn-d {
-            border: none;
+            border: 1px solid rgba(224, 112, 112, .25);
             background: rgba(224, 112, 112, .15);
-            color: var(--danger);
-            border: 1px solid rgba(224, 112, 112, .25)
+            color: var(--danger)
         }
 
         .btn-d:hover {
@@ -286,10 +285,9 @@
         }
 
         .btn-s {
-            border: none;
+            border: 1px solid rgba(112, 201, 160, .25);
             background: rgba(112, 201, 160, .15);
-            color: var(--success);
-            border: 1px solid rgba(112, 201, 160, .25)
+            color: var(--success)
         }
 
         .btn-s:hover {
@@ -328,7 +326,7 @@
             }
         }
 
-        /* ── STAT CARDS ── */
+        /* STATS */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -374,7 +372,7 @@
             color: var(--accent)
         }
 
-        /* ── TABLES ── */
+        /* TABLES */
         .table-wrap {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -476,7 +474,7 @@
             color: #a08cdc
         }
 
-        /* ── SCHEDULE GRID ── */
+        /* SCHEDULE */
         .sched-toolbar {
             display: flex;
             gap: 10px;
@@ -625,7 +623,36 @@
             opacity: 1
         }
 
-        /* ── MODAL ── */
+        /* EMPTY STATES */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            gap: 14px;
+            color: var(--muted);
+            text-align: center
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            opacity: .3
+        }
+
+        .empty-state h3 {
+            font-size: 16px;
+            color: var(--text);
+            font-family: 'DM Serif Display', serif
+        }
+
+        .empty-state p {
+            font-size: 13px;
+            max-width: 320px;
+            line-height: 1.6
+        }
+
+        /* MODAL */
         .overlay {
             display: none;
             position: fixed;
@@ -715,6 +742,12 @@
             gap: 12px
         }
 
+        .field-hint {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: -4px
+        }
+
         .modal-foot {
             display: flex;
             justify-content: flex-end;
@@ -747,45 +780,7 @@
             border-color: #fff
         }
 
-        /* ── TEMPLATE CARDS ── */
-        .tmpl-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-            margin-bottom: 22px
-        }
-
-        .tmpl-card {
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-            cursor: pointer;
-            transition: border-color .18s, background .18s
-        }
-
-        .tmpl-card:hover {
-            border-color: var(--accent);
-            background: rgba(200, 169, 110, .05)
-        }
-
-        .tmpl-card.sel {
-            border-color: var(--accent);
-            background: rgba(200, 169, 110, .08)
-        }
-
-        .tmpl-card h4 {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 4px
-        }
-
-        .tmpl-card p {
-            font-size: 12px;
-            color: var(--muted);
-            line-height: 1.5
-        }
-
-        /* ── SCROLLBAR ── */
+        /* MISC */
         ::-webkit-scrollbar {
             width: 5px;
             height: 5px
@@ -800,7 +795,6 @@
             border-radius: 4px
         }
 
-        /* ── SECTION TITLE ── */
         .sec-title {
             font-family: 'DM Serif Display', serif;
             font-size: 18px;
@@ -819,7 +813,6 @@
             font-size: 18px
         }
 
-        /* ── SEARCH ── */
         .search-box {
             display: flex;
             align-items: center;
@@ -842,7 +835,6 @@
             width: 180px
         }
 
-        /* ── NOTIF ITEMS ── */
         .notif-list {
             display: flex;
             flex-direction: column;
@@ -889,7 +881,6 @@
             margin-top: 2px
         }
 
-        /* ── AVAILABILITY GRID ── */
         .avail-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -936,7 +927,7 @@
 
 <body>
 
-    <!-- ═══════════════ SIDEBAR ═══════════════ -->
+    <!-- SIDEBAR -->
     <aside class="sb">
         <div class="sb-brand">
             <div class="sb-logo">H</div>
@@ -946,127 +937,101 @@
             <span class="sb-label">General</span>
             <button class="ni active" onclick="go('home',this)"><span class="ni-ic">▦</span> Resumen</button>
             <button class="ni" onclick="go('horario',this)"><span class="ni-ic">▤</span> Horarios</button>
-
             <span class="sb-label">Administrar</span>
             <button class="ni" onclick="go('usuarios',this)"><span class="ni-ic">◻</span> Usuarios</button>
             <button class="ni" onclick="go('grupos',this)"><span class="ni-ic">◻</span> Grupos</button>
             <button class="ni" onclick="go('salones',this)"><span class="ni-ic">◻</span> Salones</button>
-
             <span class="sb-label">Sistema</span>
             <button class="ni" onclick="go('solicitudes',this)"><span class="ni-ic">◻</span> Solicitudes<span class="nb"
-                    id="sol-badge">2</span></button>
+                    id="sol-badge">0</span></button>
             <button class="ni" onclick="go('notificaciones',this)"><span class="ni-ic">◻</span> Notificaciones<span
-                    class="nb" id="notif-badge">3</span></button>
+                    class="nb" id="notif-badge">0</span></button>
         </nav>
         <div class="sb-foot">
             <div class="user-row">
-                <div class="av">DA</div>
+                <div class="av">AD</div>
                 <div class="u-info">
-                    <div class="u-name">Daniel Quiñonez</div>
-                    <div class="u-role">Administrador</div>
+                    <div class="u-name">Administrador</div>
+                    <div class="u-role">Admin</div>
                 </div>
             </div>
         </div>
     </aside>
 
-    <!-- ═══════════════ MAIN ═══════════════ -->
+    <!-- MAIN -->
     <div class="main">
         <div class="topbar">
             <div class="tb-left">
                 <h1 id="tb-title">Resumen</h1>
-                <p id="tb-sub">Bienvenido, Daniel — Panel de administración</p>
+                <p id="tb-sub">Panel de administración</p>
             </div>
             <div class="tb-right" id="tb-actions"></div>
         </div>
 
         <div class="content">
 
-            <!-- ══ HOME ══ -->
+            <!-- HOME -->
             <div class="panel active" id="panel-home">
                 <div class="stats-grid">
-                    <div class="stat-card"><span class="label">Usuarios</span><span class="value">24</span><span
-                            class="sub">+2 esta semana</span></div>
-                    <div class="stat-card"><span class="label">Profesores</span><span class="value">8</span><span
-                            class="sub">6 activos</span></div>
-                    <div class="stat-card"><span class="label">Grupos</span><span class="value">5</span><span
-                            class="sub">3141033 y más</span></div>
-                    <div class="stat-card"><span class="label">Salones</span><span class="value">12</span><span
-                            class="sub">9 disponibles</span></div>
-                    <div class="stat-card accent"><span class="label">Horarios activos</span><span
-                            class="value">18</span><span class="sub">Esta semana</span></div>
-                    <div class="stat-card"><span class="label">Solicitudes</span><span class="value">2</span><span
-                            class="sub">Pendientes</span></div>
+                    <div class="stat-card"><span class="label">Usuarios</span><span class="value"
+                            id="count-usuarios">—</span><span class="sub">Registrados</span></div>
+                    <div class="stat-card"><span class="label">Profesores</span><span class="value"
+                            id="count-profesores">—</span><span class="sub">Activos</span></div>
+                    <div class="stat-card"><span class="label">Grupos</span><span class="value"
+                            id="count-grupos">—</span><span class="sub">Creados</span></div>
+                    <div class="stat-card"><span class="label">Salones</span><span class="value"
+                            id="count-salones">—</span><span class="sub">Registrados</span></div>
+                    <div class="stat-card accent"><span class="label">Horarios activos</span><span class="value"
+                            id="count-horarios">—</span><span class="sub">Esta semana</span></div>
+                    <div class="stat-card"><span class="label">Solicitudes</span><span class="value"
+                            id="count-solicitudes">—</span><span class="sub">Pendientes</span></div>
                 </div>
-
                 <div class="table-wrap">
                     <div class="table-head">
                         <h3>Actividad reciente</h3>
                     </div>
-                    <div class="notif-list" style="padding:6px 0">
-                        <div class="notif-item"><span class="notif-dot"></span>
-                            <div class="notif-body">
-                                <div class="notif-msg">Carlos Ramos solicitó cambio de rol a <strong>Profesor</strong>
-                                </div>
-                                <div class="notif-time">Hace 10 min</div>
-                            </div>
-                        </div>
-                        <div class="notif-item"><span class="notif-dot"></span>
-                            <div class="notif-body">
-                                <div class="notif-msg">Nuevo horario creado para el grupo <strong>3141033</strong></div>
-                                <div class="notif-time">Hace 1 hora</div>
-                            </div>
-                        </div>
-                        <div class="notif-item"><span class="notif-dot read"></span>
-                            <div class="notif-body">
-                                <div class="notif-msg">Salón 204 marcado como <strong>no disponible</strong></div>
-                                <div class="notif-time">Ayer</div>
-                            </div>
-                        </div>
-                        <div class="notif-item"><span class="notif-dot read"></span>
-                            <div class="notif-body">
-                                <div class="notif-msg">María López se registró como <strong>Estudiante</strong></div>
-                                <div class="notif-time">Hace 2 días</div>
-                            </div>
-                        </div>
+                    <div class="notif-list activity-list" style="padding:6px 0">
+                        <p style="color:var(--muted);padding:20px 16px;font-size:13px">Cargando actividad…</p>
                     </div>
                 </div>
             </div>
 
-            <!-- ══ HORARIO ══ -->
+            <!-- HORARIO -->
             <div class="panel" id="panel-horario">
-                <div class="sched-toolbar">
-                    <select id="sched-grupo" onchange="renderSched()">
-                        <option value="3141033">Ficha 3141033</option>
-                        <option value="3141034">Ficha 3141034</option>
-                        <option value="col-manana">Colegio — Mañana</option>
-                        <option value="col-tarde">Colegio — Tarde</option>
-                    </select>
-                    <select id="sched-tmpl" onchange="applyTemplate()">
-                        <option value="">Plantilla…</option>
-                        <option value="sena">SENA (2 bloques × 3h)</option>
-                        <option value="col-m">Colegio Mañana (6am–12pm)</option>
-                        <option value="col-t">Colegio Tarde (1pm–5pm)</option>
-                    </select>
-                    <button class="btn btn-o" onclick="clearSched()">Limpiar</button>
-                    <button class="btn btn-p" onclick="openModal('modal-bloque')">+ Agregar bloque</button>
+                <div id="sched-no-groups" style="display:none">
+                    <div class="empty-state">
+                        <div class="icon">▤</div>
+                        <h3>Sin grupos creados</h3>
+                        <p>Primero crea un grupo en la sección <strong>Grupos</strong> para poder gestionar su horario.
+                        </p>
+                        <button class="btn btn-p" style="margin-top:8px"
+                            onclick="go('grupos', document.querySelectorAll('.ni')[3])">Ir a Grupos</button>
+                    </div>
                 </div>
-                <div class="sched-wrap">
-                    <table class="sched-table">
-                        <thead id="sched-head"></thead>
-                        <tbody id="sched-body"></tbody>
-                    </table>
+                <div id="sched-content">
+                    <div class="sched-toolbar">
+                        <select id="sched-grupo" onchange="renderSched()"></select>
+                        <button class="btn btn-o" onclick="clearSched()">Limpiar horario</button>
+                        <button class="btn btn-p" onclick="abrirModalBloque()">+ Agregar bloque</button>
+                    </div>
+                    <div class="sched-wrap">
+                        <table class="sched-table">
+                            <thead id="sched-head"></thead>
+                            <tbody id="sched-body"></tbody>
+                        </table>
+                    </div>
+                    <p style="font-size:12px;color:var(--muted);margin-top:10px">Haz clic en cualquier celda vacía para
+                        agregar un bloque. Los bloques se guardan por grupo.</p>
                 </div>
-                <p style="font-size:12px;color:var(--muted);margin-top:10px">Haz clic en cualquier celda vacía para
-                    agregar un bloque, o usa el botón. Los bloques se guardan por grupo.</p>
             </div>
 
-            <!-- ══ USUARIOS ══ -->
+            <!-- USUARIOS -->
             <div class="panel" id="panel-usuarios">
                 <div class="sec-row">
                     <h2>Usuarios</h2>
                     <div style="display:flex;gap:8px">
-                        <div class="search-box"><span>&#x2315;</span><input id="usr-search"
-                                placeholder="Buscar usuario…" oninput="filterTable('usr-tbody','usr-search')" /></div>
+                        <div class="search-box"><span>⌕</span><input id="usr-search" placeholder="Buscar usuario…"
+                                oninput="filterTable('usr-tbody','usr-search')" /></div>
                         <button class="btn btn-p" onclick="openModal('modal-usuario')">+ Nuevo usuario</button>
                     </div>
                 </div>
@@ -1084,59 +1049,15 @@
                         </thead>
                         <tbody id="usr-tbody">
                             <tr>
-                                <td>Daniel Quiñonez</td>
-                                <td>daniel_q</td>
-                                <td>daniel@sena.co</td>
-                                <td><span class="badge badge-admin">Admin</span></td>
-                                <td><span class="badge badge-act">Activo</span></td>
-                                <td>
-                                    <div class="actions-cell"><button class="btn btn-o btn-sm"
-                                            onclick="openEdit('usuario','Daniel Quiñonez')">Editar</button><button
-                                            class="btn btn-d btn-sm">Desactivar</button></div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Laura Martínez</td>
-                                <td>laura_m</td>
-                                <td>laura@sena.co</td>
-                                <td><span class="badge badge-prof">Profesor</span></td>
-                                <td><span class="badge badge-act">Activo</span></td>
-                                <td>
-                                    <div class="actions-cell"><button class="btn btn-o btn-sm"
-                                            onclick="openEdit('usuario','Laura Martínez')">Editar</button><button
-                                            class="btn btn-d btn-sm">Desactivar</button></div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Carlos Ramos</td>
-                                <td>carlos_r</td>
-                                <td>carlos@correo.co</td>
-                                <td><span class="badge badge-est">Estudiante</span></td>
-                                <td><span class="badge badge-act">Activo</span></td>
-                                <td>
-                                    <div class="actions-cell"><button class="btn btn-o btn-sm"
-                                            onclick="openEdit('usuario','Carlos Ramos')">Editar</button><button
-                                            class="btn btn-d btn-sm">Desactivar</button></div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Sofía Torres</td>
-                                <td>sofia_t</td>
-                                <td>sofia@correo.co</td>
-                                <td><span class="badge badge-est">Estudiante</span></td>
-                                <td><span class="badge badge-inac">Inactivo</span></td>
-                                <td>
-                                    <div class="actions-cell"><button class="btn btn-o btn-sm"
-                                            onclick="openEdit('usuario','Sofía Torres')">Editar</button><button
-                                            class="btn btn-s btn-sm">Activar</button></div>
-                                </td>
+                                <td colspan="6" style="text-align:center;color:var(--muted);padding:30px">No hay
+                                    usuarios registrados aún.</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- ══ GRUPOS ══ -->
+            <!-- GRUPOS -->
             <div class="panel" id="panel-grupos">
                 <div class="sec-row">
                     <h2>Grupos</h2>
@@ -1146,7 +1067,7 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Nombre</th>
+                                <th>Nombre / Salón</th>
                                 <th>Descripción</th>
                                 <th>Miembros</th>
                                 <th>Profesor asignado</th>
@@ -1154,48 +1075,16 @@
                             </tr>
                         </thead>
                         <tbody id="grp-tbody">
-                            <tr>
-                                <td><strong>3141033</strong></td>
-                                <td>Programación cloud — SENA</td>
-                                <td>18</td>
-                                <td>Laura Martínez</td>
-                                <td>
-                                    <div class="actions-cell"><button class="btn btn-o btn-sm"
-                                            onclick="openEdit('grupo','3141033')">Editar</button><button
-                                            class="btn btn-o btn-sm">Miembros</button><button
-                                            class="btn btn-d btn-sm">Eliminar</button></div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>3141034</strong></td>
-                                <td>Diseño gráfico — SENA</td>
-                                <td>22</td>
-                                <td>Sin asignar</td>
-                                <td>
-                                    <div class="actions-cell"><button class="btn btn-o btn-sm"
-                                            onclick="openEdit('grupo','3141034')">Editar</button><button
-                                            class="btn btn-o btn-sm">Miembros</button><button
-                                            class="btn btn-d btn-sm">Eliminar</button></div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Col-Mañana</strong></td>
-                                <td>Colegio jornada mañana</td>
-                                <td>35</td>
-                                <td>Pedro Suárez</td>
-                                <td>
-                                    <div class="actions-cell"><button class="btn btn-o btn-sm"
-                                            onclick="openEdit('grupo','Col-Mañana')">Editar</button><button
-                                            class="btn btn-o btn-sm">Miembros</button><button
-                                            class="btn btn-d btn-sm">Eliminar</button></div>
-                                </td>
+                            <tr id="grp-empty-row">
+                                <td colspan="5" style="text-align:center;color:var(--muted);padding:30px">No hay grupos
+                                    creados. Usa <strong>+ Nuevo grupo</strong> para comenzar.</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- ══ SALONES ══ -->
+            <!-- SALONES -->
             <div class="panel" id="panel-salones">
                 <div class="sec-row">
                     <h2>Salones</h2>
@@ -1203,7 +1092,9 @@
                 </div>
                 <h3 style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:400">Disponibilidad actual
                 </h3>
-                <div class="avail-grid" id="avail-grid"></div>
+                <div class="avail-grid" id="avail-grid">
+                    <p style="color:var(--muted);font-size:13px;grid-column:1/-1">No hay salones registrados aún.</p>
+                </div>
                 <div style="margin-top:22px">
                     <div class="table-wrap">
                         <table>
@@ -1217,54 +1108,8 @@
                             </thead>
                             <tbody id="sal-tbody">
                                 <tr>
-                                    <td>Sala 204</td>
-                                    <td>30</td>
-                                    <td><span class="badge badge-act">Disponible</span></td>
-                                    <td>
-                                        <div class="actions-cell"><button class="btn btn-o btn-sm"
-                                                onclick="openEdit('salon','Sala 204')">Editar</button><button
-                                                class="btn btn-d btn-sm">Eliminar</button></div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Lab 101</td>
-                                    <td>25</td>
-                                    <td><span class="badge badge-inac">Ocupado</span></td>
-                                    <td>
-                                        <div class="actions-cell"><button class="btn btn-o btn-sm"
-                                                onclick="openEdit('salon','Lab 101')">Editar</button><button
-                                                class="btn btn-d btn-sm">Eliminar</button></div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Lab 103</td>
-                                    <td>25</td>
-                                    <td><span class="badge badge-act">Disponible</span></td>
-                                    <td>
-                                        <div class="actions-cell"><button class="btn btn-o btn-sm"
-                                                onclick="openEdit('salon','Lab 103')">Editar</button><button
-                                                class="btn btn-d btn-sm">Eliminar</button></div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Sala 301</td>
-                                    <td>40</td>
-                                    <td><span class="badge badge-indu">En inducción</span></td>
-                                    <td>
-                                        <div class="actions-cell"><button class="btn btn-o btn-sm"
-                                                onclick="openEdit('salon','Sala 301')">Editar</button><button
-                                                class="btn btn-d btn-sm">Eliminar</button></div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Lab 202</td>
-                                    <td>20</td>
-                                    <td><span class="badge badge-act">Disponible</span></td>
-                                    <td>
-                                        <div class="actions-cell"><button class="btn btn-o btn-sm"
-                                                onclick="openEdit('salon','Lab 202')">Editar</button><button
-                                                class="btn btn-d btn-sm">Eliminar</button></div>
-                                    </td>
+                                    <td colspan="4" style="text-align:center;color:var(--muted);padding:30px">No hay
+                                        salones registrados aún.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1272,7 +1117,7 @@
                 </div>
             </div>
 
-            <!-- ══ SOLICITUDES ══ -->
+            <!-- SOLICITUDES -->
             <div class="panel" id="panel-solicitudes">
                 <h2 class="sec-title">Solicitudes de Rol</h2>
                 <div class="table-wrap">
@@ -1287,37 +1132,17 @@
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="sol-tbody">
                             <tr>
-                                <td>Carlos Ramos</td>
-                                <td><span class="badge badge-est">Estudiante</span></td>
-                                <td><span class="badge badge-prof">Profesor</span></td>
-                                <td>2026-03-04</td>
-                                <td><span class="badge badge-pend">Pendiente</span></td>
-                                <td>
-                                    <div class="actions-cell"><button class="btn btn-s btn-sm"
-                                            onclick="approveSol(this)">Aprobar</button><button class="btn btn-d btn-sm"
-                                            onclick="rejectSol(this)">Rechazar</button></div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Ana Jiménez</td>
-                                <td><span class="badge badge-est">Estudiante</span></td>
-                                <td><span class="badge badge-admin">Admin</span></td>
-                                <td>2026-03-03</td>
-                                <td><span class="badge badge-pend">Pendiente</span></td>
-                                <td>
-                                    <div class="actions-cell"><button class="btn btn-s btn-sm"
-                                            onclick="approveSol(this)">Aprobar</button><button class="btn btn-d btn-sm"
-                                            onclick="rejectSol(this)">Rechazar</button></div>
-                                </td>
+                                <td colspan="6" style="text-align:center;color:var(--muted);padding:30px">No hay
+                                    solicitudes pendientes.</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- ══ NOTIFICACIONES ══ -->
+            <!-- NOTIFICACIONES -->
             <div class="panel" id="panel-notificaciones">
                 <div class="sec-row">
                     <h2>Notificaciones</h2>
@@ -1325,47 +1150,22 @@
                 </div>
                 <div class="table-wrap">
                     <div class="notif-list" id="notif-list" style="padding:6px 0">
-                        <div class="notif-item"><span class="notif-dot"></span>
-                            <div class="notif-body">
-                                <div class="notif-msg">Carlos Ramos solicitó cambio de rol a <strong>Profesor</strong>
-                                </div>
-                                <div class="notif-time">Hace 10 min</div>
-                            </div>
-                        </div>
-                        <div class="notif-item"><span class="notif-dot"></span>
-                            <div class="notif-body">
-                                <div class="notif-msg">Nuevo horario creado para <strong>3141033</strong></div>
-                                <div class="notif-time">Hace 1 hora</div>
-                            </div>
-                        </div>
-                        <div class="notif-item"><span class="notif-dot"></span>
-                            <div class="notif-body">
-                                <div class="notif-msg">Conflicto detectado: Laura M. asignada en 2 salones a las 08:00
-                                </div>
-                                <div class="notif-time">Hace 2 horas</div>
-                            </div>
-                        </div>
-                        <div class="notif-item"><span class="notif-dot read"></span>
-                            <div class="notif-body">
-                                <div class="notif-msg">Salón 204 marcado como no disponible</div>
-                                <div class="notif-time">Ayer</div>
-                            </div>
-                        </div>
+                        <p style="color:var(--muted);padding:20px 16px;font-size:13px">No hay notificaciones.</p>
                     </div>
                 </div>
             </div>
 
-        </div><!-- /content -->
-    </div><!-- /main -->
+        </div>
+    </div>
 
-    <!-- ═══════════════ MODALS ═══════════════ -->
+    <!-- MODALS -->
 
-    <!-- MODAL: Bloque de horario -->
+    <!-- Modal: Bloque -->
     <div class="overlay" id="modal-bloque">
         <div class="modal">
             <h2 id="bloque-modal-title">Agregar bloque</h2>
             <p class="sub">Completa los datos del bloque de clase</p>
-            <div class="field"><label>Materia / Nombre</label><input id="blk-nombre" placeholder="Ej: Bases de Datos" />
+            <div class="field"><label>Materia / Nombre</label><input id="blk-nombre" placeholder="Ej: Matemáticas" />
             </div>
             <div class="field-row">
                 <div class="field"><label>Día</label>
@@ -1380,24 +1180,17 @@
                 </div>
                 <div class="field"><label>Salón</label>
                     <select id="blk-salon">
-                        <option>Sala 204</option>
-                        <option>Lab 101</option>
-                        <option>Lab 103</option>
-                        <option>Sala 301</option>
-                        <option>Lab 202</option>
+                        <option value="">— Sin salones —</option>
                     </select>
                 </div>
             </div>
             <div class="field-row">
                 <div class="field"><label>Hora inicio</label><input type="time" id="blk-inicio" value="07:00" /></div>
-                <div class="field"><label>Hora fin</label><input type="time" id="blk-fin" value="10:00" /></div>
+                <div class="field"><label>Hora fin</label><input type="time" id="blk-fin" value="09:00" /></div>
             </div>
             <div class="field"><label>Profesor</label>
                 <select id="blk-prof">
-                    <option>Laura Martínez</option>
-                    <option>Pedro Suárez</option>
-                    <option>Ana Jiménez</option>
-                    <option>Sin asignar</option>
+                    <option value="Sin asignar">Sin asignar</option>
                 </select>
             </div>
             <div class="field"><label>Color del bloque</label>
@@ -1419,10 +1212,10 @@
         </div>
     </div>
 
-    <!-- MODAL: Usuario -->
+    <!-- Modal: Usuario -->
     <div class="overlay" id="modal-usuario">
         <div class="modal">
-            <h2 id="usr-modal-title">Nuevo usuario</h2>
+            <h2>Nuevo usuario</h2>
             <p class="sub">Completa los datos del usuario</p>
             <div class="field-row">
                 <div class="field"><label>Nombre</label><input id="usr-nombre" placeholder="Juan" /></div>
@@ -1447,20 +1240,22 @@
         </div>
     </div>
 
-    <!-- MODAL: Grupo -->
+    <!-- Modal: Grupo -->
     <div class="overlay" id="modal-grupo">
         <div class="modal">
-            <h2 id="grp-modal-title">Nuevo grupo</h2>
-            <p class="sub">Define el nombre y descripción del grupo</p>
-            <div class="field"><label>Nombre del grupo</label><input id="grp-nombre" placeholder="Ej: 3141033" /></div>
+            <h2>Nuevo grupo</h2>
+            <p class="sub">Define el nombre del grupo o salón de tu institución</p>
+            <div class="field">
+                <label>Nombre del grupo / Salón</label>
+                <input id="grp-nombre" placeholder="Ej: 11-B, 10-2, Grado 9A, 3141033…" />
+                <span class="field-hint">Usa el formato que maneja tu institución (letras, números o
+                    combinación).</span>
+            </div>
             <div class="field"><label>Descripción</label><textarea id="grp-desc" rows="3"
                     placeholder="Descripción del grupo…"></textarea></div>
             <div class="field"><label>Profesor asignado</label>
                 <select id="grp-prof">
                     <option value="">Sin asignar</option>
-                    <option>Laura Martínez</option>
-                    <option>Pedro Suárez</option>
-                    <option>Ana Jiménez</option>
                 </select>
             </div>
             <div class="modal-foot">
@@ -1470,12 +1265,13 @@
         </div>
     </div>
 
-    <!-- MODAL: Salón -->
+    <!-- Modal: Salón -->
     <div class="overlay" id="modal-salon">
         <div class="modal">
-            <h2 id="sal-modal-title">Nuevo salón</h2>
+            <h2>Nuevo salón</h2>
             <p class="sub">Registra el salón y su capacidad</p>
-            <div class="field"><label>Nombre del salón</label><input id="sal-nombre" placeholder="Ej: Lab 104" /></div>
+            <div class="field"><label>Nombre del salón</label><input id="sal-nombre"
+                    placeholder="Ej: Lab 104, Aula 3…" /></div>
             <div class="field"><label>Capacidad</label><input type="number" id="sal-cap" placeholder="30" min="1" />
             </div>
             <div class="modal-foot">
@@ -1486,33 +1282,18 @@
     </div>
 
     <script>
-        const COLORS = {
-            c0: '#c8a96e', c1: '#64a0dc', c2: '#78c88c', c3: '#c878b4',
-            c4: '#dc9664', c5: '#a08cdc', c6: '#60c8c0', c7: '#e0b060'
-        };
+        const COLORS = { c0: '#c8a96e', c1: '#64a0dc', c2: '#78c88c', c3: '#c878b4', c4: '#dc9664', c5: '#a08cdc', c6: '#60c8c0', c7: '#e0b060' };
 
-        // bloques por grupo: { grupoId: [ {dia, hora_inicio, hora_fin, nombre, salon, profesor, color} ] }
-        const schedData = {
-            '3141033': [
-                { dia: 'lunes', hora_inicio: '07:00', hora_fin: '10:00', nombre: 'Bases de Datos', salon: 'Sala 204', profesor: 'Laura Martínez', color: 'c0' },
-                { dia: 'lunes', hora_inicio: '10:00', hora_fin: '13:00', nombre: 'Redes', salon: 'Lab 101', profesor: 'Pedro Suárez', color: 'c1' },
-                { dia: 'martes', hora_inicio: '07:00', hora_fin: '10:00', nombre: 'Programación Web', salon: 'Lab 103', profesor: 'Laura Martínez', color: 'c2' },
-                { dia: 'miercoles', hora_inicio: '07:00', hora_fin: '10:00', nombre: 'Cloud Computing', salon: 'Lab 202', profesor: 'Laura Martínez', color: 'c4' },
-                { dia: 'jueves', hora_inicio: '07:00', hora_fin: '10:00', nombre: 'Seguridad Informática', salon: 'Sala 301', profesor: 'Ana Jiménez', color: 'c5' },
-                { dia: 'viernes', hora_inicio: '07:00', hora_fin: '10:00', nombre: 'Proyecto Integrador', salon: 'Sala 204', profesor: 'Laura Martínez', color: 'c6' },
-            ],
-            '3141034': [],
-            'col-manana': [],
-            'col-tarde': []
-        };
+        // Estado de la app (todo vacío al inicio)
+        const grupos = [];
+        const salonesData = [];
+        const schedData = {};
 
         let selectedColor = 'c0';
-        let editingBlock = null; // { grupoId, index }
-        let clickedCell = null;  // { dia, hora }
+        let editingBlock = null;
+        let clickedCell = null;
 
-        /* ══════════════════════════════════
-           NAVEGACIÓN
-        ══════════════════════════════════ */
+        /* NAVEGACIÓN */
         const panelMeta = {
             home: { title: 'Resumen', sub: 'Panel de administración' },
             horario: { title: 'Gestión de Horarios', sub: 'Crea y edita bloques por grupo' },
@@ -1532,88 +1313,82 @@
             document.getElementById('tb-title').textContent = m.title;
             document.getElementById('tb-sub').textContent = m.sub;
             if (name === 'notificaciones') { const b = document.getElementById('notif-badge'); if (b) b.remove(); }
-            if (name === 'horario') renderSched();
+            if (name === 'horario') renderSchedPanel();
         }
 
-        /* ══════════════════════════════════
-           HORARIO — RENDER
-        ══════════════════════════════════ */
+        /* PANEL HORARIO */
+        function renderSchedPanel() {
+            const noGroups = document.getElementById('sched-no-groups');
+            const schedCont = document.getElementById('sched-content');
+            if (grupos.length === 0) {
+                noGroups.style.display = 'block';
+                schedCont.style.display = 'none';
+                return;
+            }
+            noGroups.style.display = 'none';
+            schedCont.style.display = 'block';
+            const sel = document.getElementById('sched-grupo');
+            sel.innerHTML = grupos.map(g => `<option value="${g.id}">${g.nombre}</option>`).join('');
+            renderSched();
+        }
+
+        /* HORARIO RENDER */
         const DIAS = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
         const DIAS_LABEL = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
         function currentGrupo() { return document.getElementById('sched-grupo').value; }
 
-        function horaRange() {
-            const g = currentGrupo();
-            if (g === 'col-manana') return [6, 12];
-            if (g === 'col-tarde') return [13, 17];
-            return [6, 20]; // SENA / default
-        }
-
         function buildHoras() {
-            const [s, e] = horaRange();
             const arr = [];
-            for (let h = s; h < e; h++) arr.push(String(h).padStart(2, '0') + ':00');
+            for (let h = 6; h < 20; h++) arr.push(String(h).padStart(2, '0') + ':00');
             return arr;
         }
 
         function getBlocks(dia, hora) {
-            const g = currentGrupo();
-            return (schedData[g] || []).filter(b => b.dia === dia && b.hora_inicio === hora);
+            return (schedData[currentGrupo()] || []).filter(b => b.dia === dia && b.hora_inicio === hora);
         }
 
         function renderSched() {
             const horas = buildHoras();
             const head = document.getElementById('sched-head');
             const body = document.getElementById('sched-body');
-
-            // head
-            head.innerHTML = '<tr><th>Hora</th>'
-                + DIAS_LABEL.map(d => `<th>${d}</th>`).join('') + '</tr>';
-
-            // occupied map for rowspan
+            head.innerHTML = '<tr><th>Hora</th>' + DIAS_LABEL.map(d => `<th>${d}</th>`).join('') + '</tr>';
             const occ = {};
             body.innerHTML = '';
-
             horas.forEach(hora => {
                 const tr = document.createElement('tr');
-                // time cell
                 const td0 = document.createElement('td');
-                td0.className = 'time-lbl'; td0.textContent = hora;
+                td0.className = 'time-lbl';
+                td0.textContent = hora;
                 tr.appendChild(td0);
-
                 DIAS.forEach(dia => {
                     const key = `${dia}-${hora}`;
-                    if (occ[key]) { return; }
-
+                    if (occ[key]) return;
                     const blocks = getBlocks(dia, hora);
                     const td = document.createElement('td');
                     td.className = 'sc';
-
                     if (blocks.length) {
                         const b = blocks[0];
-                        const [sh] = b.hora_inicio.split(':').map(Number);
-                        const [eh] = b.hora_fin.split(':').map(Number);
+                        const sh = parseInt(b.hora_inicio);
+                        const eh = parseInt(b.hora_fin);
                         const span = eh - sh;
                         if (span > 1) {
                             td.rowSpan = span;
                             for (let i = 1; i < span; i++) occ[`${dia}-${String(sh + i).padStart(2, '0')}:00`] = true;
                         }
                         const col = COLORS[b.color] || COLORS.c0;
-                        const colA = col + '28'; // 16% opacity bg
+                        const colA = col + '28';
                         const idx = (schedData[currentGrupo()] || []).indexOf(b);
-
                         td.innerHTML = `
-  <div class="blk" style="background:${colA};border-left:3px solid ${col};color:${col}"
-       onclick="editBlock(${idx})">
-    <span class="class-name blk-name">${b.nombre}</span>
+  <div class="blk" style="background:${colA};border-left:3px solid ${col};color:${col}" onclick="editBlock(${idx})">
+    <span class="blk-name">${b.nombre}</span>
     <span class="blk-info">📍 ${b.salon} · ${b.hora_inicio}–${b.hora_fin}</span>
     <span class="blk-info">${b.profesor}</span>
     <button class="blk-del" onclick="deleteBlock(event,${idx})">✕</button>
   </div>`;
                     } else {
                         td.innerHTML = `<span class="add-hint">+</span>`;
-                        td.onclick = () => { clickedCell = { dia, hora }; openModal('modal-bloque', true); };
+                        td.onclick = () => { clickedCell = { dia, hora }; abrirModalBloque(true); };
                     }
                     tr.appendChild(td);
                 });
@@ -1621,9 +1396,22 @@
             });
         }
 
-        /* ══════════════════════════════════
-           BLOQUES — CRUD
-        ══════════════════════════════════ */
+        /* BLOQUES CRUD */
+        function abrirModalBloque(fromCell) {
+            editingBlock = null;
+            document.getElementById('bloque-modal-title').textContent = 'Agregar bloque';
+            document.getElementById('blk-nombre').value = '';
+            document.getElementById('blk-inicio').value = '07:00';
+            document.getElementById('blk-fin').value = '09:00';
+            if (fromCell && clickedCell) {
+                document.getElementById('blk-dia').value = clickedCell.dia;
+                document.getElementById('blk-inicio').value = clickedCell.hora;
+                const h = parseInt(clickedCell.hora);
+                document.getElementById('blk-fin').value = String(h + 1).padStart(2, '0') + ':00';
+            }
+            openModal('modal-bloque');
+        }
+
         function addBlock() {
             const nombre = document.getElementById('blk-nombre').value.trim();
             const dia = document.getElementById('blk-dia').value;
@@ -1631,23 +1419,19 @@
             const inicio = document.getElementById('blk-inicio').value;
             const fin = document.getElementById('blk-fin').value;
             const profesor = document.getElementById('blk-prof').value;
-
             if (!nombre || !inicio || !fin) { alert('Completa todos los campos.'); return; }
-            if (inicio >= fin) { alert('La hora de inicio debe ser antes de la hora fin.'); return; }
-
+            if (inicio >= fin) { alert('La hora inicio debe ser antes de la hora fin.'); return; }
             const g = currentGrupo();
             if (!schedData[g]) schedData[g] = [];
-
             if (editingBlock !== null) {
                 schedData[g][editingBlock] = { dia, hora_inicio: inicio, hora_fin: fin, nombre, salon, profesor, color: selectedColor };
                 editingBlock = null;
             } else {
                 schedData[g].push({ dia, hora_inicio: inicio, hora_fin: fin, nombre, salon, profesor, color: selectedColor });
             }
-
             closeModal('modal-bloque');
             renderSched();
-            // TODO: POST /api/horarios con el payload
+            // TODO: POST /api/horarios
         }
 
         function editBlock(idx) {
@@ -1671,7 +1455,6 @@
             if (!confirm('¿Eliminar este bloque?')) return;
             schedData[currentGrupo()].splice(idx, 1);
             renderSched();
-            // TODO: DELETE /api/horarios/:id
         }
 
         function clearSched() {
@@ -1680,72 +1463,10 @@
             renderSched();
         }
 
-        /* ══════════════════════════════════
-           PLANTILLAS
-        ══════════════════════════════════ */
-        function applyTemplate() {
-            const tmpl = document.getElementById('sched-tmpl').value;
-            if (!tmpl) return;
-            const g = currentGrupo();
-            const dias5 = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
-            const materias = ['Matemáticas', 'Español', 'Ciencias', 'Historia', 'Educación Física', 'Inglés'];
-            const colores = ['c0', 'c1', 'c2', 'c3', 'c4', 'c5'];
+        /* MODALS */
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); clickedCell = null; }
 
-            if (!confirm('¿Aplicar la plantilla? Esto reemplazará el horario actual.')) {
-                document.getElementById('sched-tmpl').value = ''; return;
-            }
-
-            schedData[g] = [];
-
-            if (tmpl === 'sena') {
-                // 2 bloques de 3h por día
-                dias5.forEach((dia, di) => {
-                    schedData[g].push({ dia, hora_inicio: '07:00', hora_fin: '10:00', nombre: materias[di % materias.length] + ' I', salon: 'Sala 204', profesor: 'Sin asignar', color: colores[di % colores.length] });
-                    schedData[g].push({ dia, hora_inicio: '10:00', hora_fin: '13:00', nombre: materias[(di + 1) % materias.length] + ' II', salon: 'Lab 101', profesor: 'Sin asignar', color: colores[(di + 1) % colores.length] });
-                });
-            } else if (tmpl === 'col-m') {
-                // Colegio mañana 6-12 → 6 horas, 6 materias
-                dias5.forEach((dia, di) => {
-                    for (let h = 0; h < 6; h++) {
-                        const hs = String(6 + h).padStart(2, '0') + ':00';
-                        const he = String(7 + h).padStart(2, '0') + ':00';
-                        schedData[g].push({ dia, hora_inicio: hs, hora_fin: he, nombre: materias[(di + h) % materias.length], salon: 'Sala 204', profesor: 'Sin asignar', color: colores[h % colores.length] });
-                    }
-                });
-            } else if (tmpl === 'col-t') {
-                dias5.forEach((dia, di) => {
-                    for (let h = 0; h < 4; h++) {
-                        const hs = String(13 + h).padStart(2, '0') + ':00';
-                        const he = String(14 + h).padStart(2, '00') + ':00';
-                        schedData[g].push({ dia, hora_inicio: hs, hora_fin: he, nombre: materias[(di + h) % materias.length], salon: 'Sala 301', profesor: 'Sin asignar', color: colores[h % colores.length] });
-                    }
-                });
-            }
-
-            document.getElementById('sched-tmpl').value = '';
-            renderSched();
-        }
-
-        /* ══════════════════════════════════
-           MODALS
-        ══════════════════════════════════ */
-        function openModal(id, fromCell) {
-            if (!fromCell) { editingBlock = null; document.getElementById('bloque-modal-title').textContent = 'Agregar bloque'; }
-            if (fromCell && clickedCell) {
-                document.getElementById('blk-dia').value = clickedCell.dia;
-                document.getElementById('blk-inicio').value = clickedCell.hora;
-                const [h] = clickedCell.hora.split(':').map(Number);
-                document.getElementById('blk-fin').value = String(h + 1).padStart(2, '0') + ':00';
-            }
-            document.getElementById(id).classList.add('open');
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('open');
-            clickedCell = null;
-        }
-
-        // cerrar al hacer clic fuera
         document.querySelectorAll('.overlay').forEach(o => {
             o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
         });
@@ -1756,58 +1477,113 @@
             selectedColor = el.dataset.c;
         }
 
-        /* ══════════════════════════════════
-           GUARDAR (placeholder — conectar backend)
-        ══════════════════════════════════ */
+        /* USUARIOS */
         function saveUsuario() {
             const n = document.getElementById('usr-nombre').value.trim();
             const a = document.getElementById('usr-apellido').value.trim();
-            if (!n || !a) { alert('Completa los campos requeridos.'); return; }
+            if (!n || !a) { alert('Completa nombre y apellido.'); return; }
             const rolVal = document.getElementById('usr-rol').value;
             const rolMap = { '1': 'Admin', '2': 'Profesor', '3': 'Estudiante' };
             const badgeMap = { '1': 'badge-admin', '2': 'badge-prof', '3': 'badge-est' };
+            const emptyRow = document.querySelector('#usr-tbody td[colspan]');
+            if (emptyRow) emptyRow.closest('tr').remove();
             const tbody = document.getElementById('usr-tbody');
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${n} ${a}</td><td>${document.getElementById('usr-nick').value}</td><td>${document.getElementById('usr-correo').value}</td>
-<td><span class="badge ${badgeMap[rolVal]}">${rolMap[rolVal]}</span></td>
-<td><span class="badge badge-act">Activo</span></td>
-<td><div class="actions-cell"><button class="btn btn-o btn-sm">Editar</button><button class="btn btn-d btn-sm">Desactivar</button></div></td>`;
+            tr.innerHTML = `
+  <td>${n} ${a}</td>
+  <td>${document.getElementById('usr-nick').value}</td>
+  <td>${document.getElementById('usr-correo').value}</td>
+  <td><span class="badge ${badgeMap[rolVal]}">${rolMap[rolVal]}</span></td>
+  <td><span class="badge badge-act">Activo</span></td>
+  <td><div class="actions-cell"><button class="btn btn-o btn-sm">Editar</button><button class="btn btn-d btn-sm">Desactivar</button></div></td>`;
             tbody.appendChild(tr);
+            if (rolVal === '2') {
+                const nombre = `${n} ${a}`;
+                ['grp-prof', 'blk-prof'].forEach(id => {
+                    const sel = document.getElementById(id);
+                    const opt = document.createElement('option');
+                    opt.value = opt.textContent = nombre;
+                    sel.appendChild(opt);
+                });
+            }
             closeModal('modal-usuario');
+            ['usr-nombre', 'usr-apellido', 'usr-nick', 'usr-correo', 'usr-pass'].forEach(id => document.getElementById(id).value = '');
             // TODO: POST /api/usuarios
         }
 
+        /* GRUPOS */
         function saveGrupo() {
             const n = document.getElementById('grp-nombre').value.trim();
-            if (!n) { alert('El nombre es requerido.'); return; }
+            if (!n) { alert('El nombre del grupo es requerido.'); return; }
+            const id = 'grp-' + Date.now();
+            const desc = document.getElementById('grp-desc').value.trim();
+            const prof = document.getElementById('grp-prof').value || 'Sin asignar';
+            grupos.push({ id, nombre: n, desc, prof });
+            schedData[id] = [];
+            const emptyRow = document.getElementById('grp-empty-row');
+            if (emptyRow) emptyRow.remove();
             const tbody = document.getElementById('grp-tbody');
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td><strong>${n}</strong></td><td>${document.getElementById('grp-desc').value}</td><td>0</td>
-<td>${document.getElementById('grp-prof').value || 'Sin asignar'}</td>
-<td><div class="actions-cell"><button class="btn btn-o btn-sm">Editar</button><button class="btn btn-o btn-sm">Miembros</button><button class="btn btn-d btn-sm">Eliminar</button></div></td>`;
+            tr.dataset.groupId = id;
+            tr.innerHTML = `
+  <td><strong>${n}</strong></td>
+  <td>${desc || '—'}</td>
+  <td>0</td>
+  <td>${prof}</td>
+  <td><div class="actions-cell">
+    <button class="btn btn-o btn-sm">Editar</button>
+    <button class="btn btn-o btn-sm">Miembros</button>
+    <button class="btn btn-d btn-sm" onclick="deleteGrupo('${id}',this)">Eliminar</button>
+  </div></td>`;
             tbody.appendChild(tr);
-            if (!schedData[n]) schedData[n] = [];
             closeModal('modal-grupo');
+            document.getElementById('grp-nombre').value = '';
+            document.getElementById('grp-desc').value = '';
+            // TODO: POST /api/grupos
         }
 
+        function deleteGrupo(id, btn) {
+            if (!confirm('¿Eliminar este grupo? Su horario también se borrará.')) return;
+            const idx = grupos.findIndex(g => g.id === id);
+            if (idx > -1) grupos.splice(idx, 1);
+            delete schedData[id];
+            btn.closest('tr').remove();
+            if (document.getElementById('grp-tbody').children.length === 0) {
+                const tr = document.createElement('tr');
+                tr.id = 'grp-empty-row';
+                tr.innerHTML = `<td colspan="5" style="text-align:center;color:var(--muted);padding:30px">No hay grupos creados. Usa <strong>+ Nuevo grupo</strong> para comenzar.</td>`;
+                document.getElementById('grp-tbody').appendChild(tr);
+            }
+        }
+
+        /* SALONES */
         function saveSalon() {
             const n = document.getElementById('sal-nombre').value.trim();
-            const c = document.getElementById('sal-cap').value;
-            if (!n || !c) { alert('Completa todos los campos.'); return; }
+            const c = parseInt(document.getElementById('sal-cap').value);
+            if (!n || !c || c < 1) { alert('Completa todos los campos correctamente.'); return; }
+            salonesData.push({ nombre: n, cap: c, occ: 0 });
+            const emptyRow = document.querySelector('#sal-tbody td[colspan]');
+            if (emptyRow) emptyRow.closest('tr').remove();
             const tbody = document.getElementById('sal-tbody');
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${n}</td><td>${c}</td><td><span class="badge badge-act">Disponible</span></td>
-<td><div class="actions-cell"><button class="btn btn-o btn-sm">Editar</button><button class="btn btn-d btn-sm">Eliminar</button></div></td>`;
+            tr.innerHTML = `
+  <td>${n}</td><td>${c}</td>
+  <td><span class="badge badge-act">Disponible</span></td>
+  <td><div class="actions-cell"><button class="btn btn-o btn-sm">Editar</button><button class="btn btn-d btn-sm">Eliminar</button></div></td>`;
             tbody.appendChild(tr);
+            const blkSalon = document.getElementById('blk-salon');
+            const firstOpt = blkSalon.querySelector('option[value=""]');
+            if (firstOpt) firstOpt.remove();
+            const opt = document.createElement('option');
+            opt.value = opt.textContent = n;
+            blkSalon.appendChild(opt);
             renderAvail();
             closeModal('modal-salon');
+            document.getElementById('sal-nombre').value = '';
+            document.getElementById('sal-cap').value = '';
         }
 
-        function openEdit(type, name) { alert(`TODO: abrir editor de ${type}: ${name}\nConecta el backend para cargar los datos del registro.`); }
-
-        /* ══════════════════════════════════
-           SOLICITUDES
-        ══════════════════════════════════ */
+        /* SOLICITUDES */
         function approveSol(btn) {
             const tr = btn.closest('tr');
             tr.querySelector('td:nth-child(5)').innerHTML = '<span class="badge badge-act">Aprobado</span>';
@@ -1823,16 +1599,12 @@
             if (b) { const n = parseInt(b.textContent) - 1; if (n <= 0) b.remove(); else b.textContent = n; }
         }
 
-        /* ══════════════════════════════════
-           NOTIFICACIONES
-        ══════════════════════════════════ */
+        /* NOTIFICACIONES */
         function markAllRead() {
             document.querySelectorAll('.notif-dot').forEach(d => d.classList.add('read'));
         }
 
-        /* ══════════════════════════════════
-           BÚSQUEDA EN TABLA
-        ══════════════════════════════════ */
+        /* BÚSQUEDA */
         function filterTable(tbodyId, inputId) {
             const q = document.getElementById(inputId).value.toLowerCase();
             document.querySelectorAll('#' + tbodyId + ' tr').forEach(tr => {
@@ -1840,105 +1612,52 @@
             });
         }
 
-        /* ══════════════════════════════════
-           DISPONIBILIDAD SALONES
-        ══════════════════════════════════ */
-        const salonesData = [
-            { nombre: 'Sala 204', cap: 30, occ: 18 },
-            { nombre: 'Lab 101', cap: 25, occ: 25 },
-            { nombre: 'Lab 103', cap: 25, occ: 5 },
-            { nombre: 'Sala 301', cap: 40, occ: 30 },
-            { nombre: 'Lab 202', cap: 20, occ: 0 },
-        ];
-
+        /* DISPONIBILIDAD */
         function renderAvail() {
             const g = document.getElementById('avail-grid');
+            if (salonesData.length === 0) {
+                g.innerHTML = '<p style="color:var(--muted);font-size:13px;grid-column:1/-1">No hay salones registrados aún.</p>';
+                return;
+            }
             g.innerHTML = salonesData.map(s => {
                 const pct = Math.round(s.occ / s.cap * 100);
                 const busy = pct >= 100;
-                return `<div class="avail-card">
-  <h4>${s.nombre}</h4>
-  <div class="cap">${s.occ}/${s.cap} lugares · ${pct}%</div>
-  <div class="avail-bar-wrap"><div class="avail-bar${busy ? ' busy' : ''}" style="width:${Math.min(pct, 100)}%"></div></div>
-</div>`;
+                return `<div class="avail-card"><h4>${s.nombre}</h4><div class="cap">${s.occ}/${s.cap} lugares · ${pct}%</div><div class="avail-bar-wrap"><div class="avail-bar${busy ? ' busy' : ''}" style="width:${Math.min(pct, 100)}%"></div></div></div>`;
             }).join('');
         }
 
-        /* ══════════════════════════════════
-           ESTADÍSTICAS DEL DASHBOARD
-        ══════════════════════════════════ */
+        /* BACKEND */
         const cargarEstadisticas = async () => {
-            // Mapea los IDs del HTML con las claves que envía el PHP
-            const elementos = {
-                total_usuarios: document.getElementById('count-usuarios'),
-                total_profesores: document.getElementById('count-profesores'),
-                total_solicitudes: document.getElementById('count-solicitudes'),
-                total_grupos: document.getElementById('count-grupos'),
-                total_salones: document.getElementById('count-salones'),
-                total_horarios: document.getElementById('count-horarios')
-            };
-
             try {
                 const resp = await fetch('api/v1/admin/stats.php');
                 if (!resp.ok) return;
                 const data = await resp.json();
-
-                // Actualiza el texto de cada cuadro solo si el dato existe
-                Object.keys(elementos).forEach(key => {
-                    if (elementos[key] && data[key] !== undefined) {
-                        elementos[key].textContent = data[key];
-                    }
-                });
-            } catch (err) {
-                console.error("Error cargando estadísticas:", err);
-            }
+                const ids = { total_usuarios: 'count-usuarios', total_profesores: 'count-profesores', total_solicitudes: 'count-solicitudes', total_grupos: 'count-grupos', total_salones: 'count-salones', total_horarios: 'count-horarios' };
+                Object.keys(ids).forEach(k => { const el = document.getElementById(ids[k]); if (el && data[k] !== undefined) el.textContent = data[k]; });
+            } catch (e) { console.error('Error stats:', e); }
         };
 
-        /* ══════════════════════════════════
-           ACTIVIDAD RECIENTE
-        ══════════════════════════════════ */
         const cargarActividad = async () => {
-            const listaActividad = document.querySelector('.activity-list');
-            if (!listaActividad) return;
-
+            const lista = document.querySelector('.activity-list');
+            if (!lista) return;
             try {
                 const resp = await fetch('api/v1/admin/actividad.php');
                 const data = await resp.json();
-
-                listaActividad.innerHTML = '';
-
-                // Importante: Esto valida los datos apenas llegan del fetch
-                if (!data || data.length === 0) {
-                    listaActividad.innerHTML = '<p style="color: #7a7d8a; padding: 1rem; font-size: 0.85rem;">No hay actividad reciente.</p>';
-                    return;
-                }
-
-                data.forEach(item => {
-                    const html = `
-                <div class="activity-item">
-                    <div class="activity-dot"></div>
-                    <div class="activity-content">
-                        <p><strong>${item.nombre}</strong> solicitó cambio de rol a <strong>${item.nombre_rol}</strong></p>
-                        <small>Estado: ${item.estado} · ${item.created_at || ''}</small>
-                    </div>
-                </div>`;
-                    listaActividad.insertAdjacentHTML('beforeend', html);
-                });
-            } catch (err) {
-                console.error("Error al cargar actividad:", err);
-            }
+                if (!data || data.length === 0) { lista.innerHTML = '<p style="color:var(--muted);padding:16px;font-size:13px">No hay actividad reciente.</p>'; return; }
+                lista.innerHTML = data.map(item => `
+  <div class="notif-item"><span class="notif-dot"></span>
+  <div class="notif-body">
+    <div class="notif-msg"><strong>${item.nombre}</strong> solicitó cambio de rol a <strong>${item.nombre_rol}</strong></div>
+    <div class="notif-time">Estado: ${item.estado} · ${item.created_at || ''}</div>
+  </div></div>`).join('');
+            } catch (e) { lista.innerHTML = '<p style="color:var(--muted);padding:16px;font-size:13px">No hay actividad reciente.</p>'; }
         };
 
-        /* ══════════════════════════════════
-           INIT
-        ══════════════════════════════════ */
+        /* INIT */
         renderAvail();
-
         document.addEventListener('DOMContentLoaded', () => {
             cargarEstadisticas();
             cargarActividad();
-
-            // Aquí puedes dejar el resto de tus listeners de modales...
         });
     </script>
 </body>
