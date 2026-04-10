@@ -1,3 +1,14 @@
+<?php
+session_start();
+require_once 'config/config.php';
+
+// Verificar si el usuario está logueado y es admin (rol_id = 1 según tu tabla)
+if (!isset($_SESSION['usuario_id']) || $_SESSION['rol_id'] != 1) {
+    header('Location: login.php');
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -1629,12 +1640,30 @@
         /* BACKEND */
         const cargarEstadisticas = async () => {
             try {
+                // Ajusta la ruta si tu admin.html está en una subcarpeta
                 const resp = await fetch('api/v1/admin/stats.php');
-                if (!resp.ok) return;
+                if (!resp.ok) throw new Error('Error en la red');
+
                 const data = await resp.json();
-                const ids = { total_usuarios: 'count-usuarios', total_profesores: 'count-profesores', total_solicitudes: 'count-solicitudes', total_grupos: 'count-grupos', total_salones: 'count-salones', total_horarios: 'count-horarios' };
-                Object.keys(ids).forEach(k => { const el = document.getElementById(ids[k]); if (el && data[k] !== undefined) el.textContent = data[k]; });
-            } catch (e) { console.error('Error stats:', e); }
+
+                // Mapeo de lo que envía PHP vs IDs en el HTML
+                const ids = {
+                    total_usuarios: 'count-usuarios',
+                    total_profesores: 'count-profesores',
+                    total_solicitudes: 'count-solicitudes',
+                    total_salones: 'count-salones', // Ahora coincide con la tabla 'aulas'
+                    total_horarios: 'count-horarios'  // Ahora coincide con la tabla 'clases'
+                };
+
+                Object.keys(ids).forEach(k => {
+                    const el = document.getElementById(ids[k]);
+                    if (el && data[k] !== undefined) {
+                        el.textContent = data[k];
+                    }
+                });
+            } catch (e) {
+                console.error('Error al cargar stats:', e);
+            }
         };
 
         const cargarActividad = async () => {
@@ -1643,22 +1672,29 @@
             try {
                 const resp = await fetch('api/v1/admin/actividad.php');
                 const data = await resp.json();
-                if (!data || data.length === 0) { lista.innerHTML = '<p style="color:var(--muted);padding:16px;font-size:13px">No hay actividad reciente.</p>'; return; }
-                lista.innerHTML = data.map(item => `
-  <div class="notif-item"><span class="notif-dot"></span>
-  <div class="notif-body">
-    <div class="notif-msg"><strong>${item.nombre}</strong> solicitó cambio de rol a <strong>${item.nombre_rol}</strong></div>
-    <div class="notif-time">Estado: ${item.estado} · ${item.created_at || ''}</div>
-  </div></div>`).join('');
-            } catch (e) { lista.innerHTML = '<p style="color:var(--muted);padding:16px;font-size:13px">No hay actividad reciente.</p>'; }
-        };
 
-        /* INIT */
-        renderAvail();
-        document.addEventListener('DOMContentLoaded', () => {
-            cargarEstadisticas();
-            cargarActividad();
-        });
+                if (!data || data.length === 0) {
+                    lista.innerHTML = '<p style="color:var(--muted);padding:16px;font-size:13px">No hay actividad reciente.</p>';
+                    return;
+                }
+
+                lista.innerHTML = data.map(item => `
+            <div class="notif-item">
+                <span class="notif-dot ${item.estado !== 'pendiente' ? 'read' : ''}"></span>
+                <div class="notif-body">
+                    <div class="notif-msg">
+                        <strong>${item.nombre}</strong> solicitó cambio de rol a <strong>${item.nombre_rol}</strong>
+                    </div>
+                    <div class="notif-time">
+                        Estado: <span class="badge ${item.estado === 'pendiente' ? 'badge-warn' : 'badge-act'}">${item.estado}</span> 
+                        · ${item.created_at}
+                    </div>
+                </div>
+            </div>`).join('');
+            } catch (e) {
+                lista.innerHTML = '<p style="color:var(--muted);padding:16px;font-size:13px">Error al conectar con la API.</p>';
+            }
+        };
     </script>
 </body>
 

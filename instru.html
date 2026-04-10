@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Horarios — Panel Instructor</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --bg: #0d0f14;
+            --surface: #13161d;
+            --surface2: #1a1e28;
+            --surface3: #21263a;
+            --border: #2a2f3e;
+            --accent: #c8a96e;
+            --accent2: #e8c98e;
+            --text: #eeeae2;
+            --muted: #7a7d8a;
+            --danger: #e07070;
+            --success: #70c9a0;
+            --sw: 230px;
+            --c0: #c8a96e;
+            --c1: #64a0dc;
+            --c2: #78c88c;
+            --c3: #c878b4;
+            --c4: #dc9664;
+            --c5: #a08cdc;
+            --c6: #60c8c0;
+            --c7: #e0b060
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden
+        }
+
+        body {
+            display: flex;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text);
+            background: var(--bg)
+        }
+
+        /* SIDEBAR */
+        .sb {
+            width: var(--sw);
+            min-height: 100vh;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0
+        }
+
+        .sb-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 22px 18px 18px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .sb-logo {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0
+        }
+
+        .sb-name {
+            font-family: 'DM Serif Display', serif;
+            font-size: 17px
+        }
+
+        .sb-nav {
+            flex: 1;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            overflow-y: auto
+        }
+
+        .sb-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--muted);
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            padding: 14px 10px 5px
+        }
+
+        .ni {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 11px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 13.5px;
+            color: var(--muted);
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            font-family: 'DM Sans', sans-serif;
+            transition: background .15s, color .15s
+        }
+
+        .ni:hover {
+            background: var(--surface2);
+            color: var(--text)
+        }
+
+        .ni.active {
+            background: var(--surface3);
+            color: var(--accent);
+            font-weight: 500
+        }
+
+        .ni-ic {
+            width: 18px;
+            text-align: center;
+            flex-shrink: 0;
+            font-size: 15px
+        }
+
+        .sb-foot {
+            padding: 10px 8px 18px;
+            border-top: 1px solid var(--border)
+        }
+
+        .user-row {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 11px;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: background .15s
+        }
+
+        .user-row:hover {
+            background: var(--surface2)
+        }
+
+        .av {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--surface3);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0
+        }
+
+        .u-info {
+            flex: 1;
+            min-width: 0
+        }
+
+        .u-name {
+            font-size: 12.5px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .u-role {
+            font-size: 11px;
+            color: var(--muted)
+        }
+
+        /* MAIN */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 0
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 28px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            flex-shrink: 0
+        }
+
+        .tb-left h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 20px
+        }
+
+        .tb-left p {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 2px;
+            font-weight: 300
+        }
+
+        .tb-right {
+            display: flex;
+            gap: 8px;
+            align-items: center
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all .18s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+            border: none
+        }
+
+        .btn-o {
+            border: 1px solid var(--border) !important;
+            background: transparent;
+            color: var(--muted)
+        }
+
+        .btn-o:hover {
+            border-color: var(--accent) !important;
+            color: var(--accent)
+        }
+
+        .btn-p {
+            background: var(--accent);
+            color: #0d0f14;
+            font-weight: 600
+        }
+
+        .btn-p:hover {
+            background: var(--accent2)
+        }
+
+        .btn-d {
+            border: 1px solid rgba(224, 112, 112, .25) !important;
+            background: rgba(224, 112, 112, .15);
+            color: var(--danger)
+        }
+
+        .btn-d:hover {
+            background: rgba(224, 112, 112, .25)
+        }
+
+        .btn-s {
+            border: 1px solid rgba(112, 201, 160, .25) !important;
+            background: rgba(112, 201, 160, .15);
+            color: var(--success)
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 28px
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block;
+            animation: fadeIn .25s ease
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            gap: 16px;
+            color: var(--muted);
+            text-align: center
+        }
+
+        .empty-state .icon {
+            font-size: 56px;
+            opacity: .25;
+            line-height: 1
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            color: var(--text);
+            font-family: 'DM Serif Display', serif
+        }
+
+        .empty-state p {
+            font-size: 13.5px;
+            max-width: 340px;
+            line-height: 1.7
+        }
+
+        /* GROUP CARDS */
+        .groups-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px
+        }
+
+        .group-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: border-color .2s
+        }
+
+        .group-card:hover {
+            border-color: rgba(200, 169, 110, .4)
+        }
+
+        .group-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px
+        }
+
+        .group-card-name {
+            font-family: 'DM Serif Display', serif;
+            font-size: 20px;
+            line-height: 1.2
+        }
+
+        .group-card-badge {
+            background: rgba(200, 169, 110, .12);
+            color: var(--accent);
+            border: 1px solid rgba(200, 169, 110, .25);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+            flex-shrink: 0
+        }
+
+        .group-card-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 5px
+        }
+
+        .group-card-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12.5px;
+            color: var(--muted)
+        }
+
+        .group-card-row strong {
+            color: var(--text)
+        }
+
+        .code-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 8px 12px
+        }
+
+        .code-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            margin-bottom: 2px
+        }
+
+        .code-value {
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: .12em
+        }
+
+        .code-copy {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 14px;
+            padding: 4px;
+            border-radius: 5px;
+            transition: color .15s, background .15s
+        }
+
+        .code-copy:hover {
+            color: var(--accent);
+            background: var(--surface3)
+        }
+
+        .group-card-actions {
+            display: flex;
+            gap: 8px;
+            padding-top: 4px;
+            border-top: 1px solid var(--border)
+        }
+
+        /* SECTION */
+        .sec-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px
+        }
+
+        .sec-row h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 18px
+        }
+
+        .sec-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 18px;
+            margin-bottom: 16px
+        }
+
+        /* TABLES */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse
+        }
+
+        thead th {
+            padding: 11px 14px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface)
+        }
+
+        tbody td {
+            padding: 11px 14px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none
+        }
+
+        tbody tr:hover {
+            background: var(--surface2)
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 6px;
+            align-items: center
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600
+        }
+
+        .badge-act {
+            background: rgba(112, 201, 160, .15);
+            color: var(--success)
+        }
+
+        .badge-pend {
+            background: rgba(220, 150, 80, .15);
+            color: #dc9650
+        }
+
+        /* MODAL */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(3px)
+        }
+
+        .overlay.open {
+            display: flex
+        }
+
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px;
+            animation: fadeIn .2s ease
+        }
+
+        .modal h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 22px;
+            margin-bottom: 4px
+        }
+
+        .modal .sub {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 22px
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            margin-bottom: 16px
+        }
+
+        .field label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .07em
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 11px 14px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            color: var(--text);
+            outline: none;
+            transition: border-color .18s;
+            -webkit-appearance: none;
+            appearance: none
+        }
+
+        .field select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7d8a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px
+        }
+
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus {
+            border-color: var(--accent)
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px
+        }
+
+        .field-hint {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: -4px
+        }
+
+        .modal-foot {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid var(--border)
+        }
+
+        /* GENERATED CODE DISPLAY */
+        .code-preview {
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            text-align: center;
+            margin-bottom: 20px
+        }
+
+        .code-preview .lbl {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-bottom: 6px
+        }
+
+        .code-preview .val {
+            font-family: monospace;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: .15em
+        }
+
+        /* NOTIFICATIONS */
+        .notif-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px
+        }
+
+        .notif-item {
+            display: flex;
+            gap: 12px;
+            padding: 13px 16px;
+            border-radius: 10px;
+            transition: background .15s
+        }
+
+        .notif-item:hover {
+            background: var(--surface2)
+        }
+
+        .notif-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+            margin-top: 5px
+        }
+
+        .notif-dot.read {
+            background: var(--border)
+        }
+
+        .notif-body {
+            flex: 1
+        }
+
+        .notif-msg {
+            font-size: 13px;
+            line-height: 1.5
+        }
+
+        .notif-time {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 2px
+        }
+
+        /* MISC */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-size: 13px;
+            color: var(--text);
+            z-index: 200;
+            animation: slideUp .3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sb">
+        <div class="sb-brand">
+            <div class="sb-logo">H</div>
+            <span class="sb-name">Horarios</span>
+        </div>
+        <nav class="sb-nav">
+            <span class="sb-label">Mi panel</span>
+            <button class="ni active" onclick="go('grupos',this)"><span class="ni-ic">◈</span> Mis grupos</button>
+            <button class="ni" onclick="go('solicitudes',this)"><span class="ni-ic">◻</span> Solicitudes</button>
+            <span class="sb-label">Cuenta</span>
+            <button class="ni" onclick="go('notificaciones',this)"><span class="ni-ic">◻</span> Notificaciones</button>
+        </nav>
+        <div class="sb-foot">
+            <div class="user-row">
+                <div class="av" id="sb-av">PR</div>
+                <div class="u-info">
+                    <div class="u-name" id="sb-nombre">Instructor</div>
+                    <div class="u-role">Profesor</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+        <div class="topbar">
+            <div class="tb-left">
+                <h1 id="tb-title">Mis grupos</h1>
+                <p id="tb-sub">Gestiona tus grupos y horarios</p>
+            </div>
+            <div class="tb-right">
+                <button class="btn btn-p" id="btn-crear-grupo" onclick="openModal('modal-grupo')" style="display:none">+
+                    Crear grupo</button>
+            </div>
+        </div>
+
+        <div class="content">
+
+            <!-- GRUPOS -->
+            <div class="panel active" id="panel-grupos">
+
+                <!-- Estado vacío (sin grupos) -->
+                <div id="grupos-vacio">
+                    <div class="empty-state">
+                        <div class="icon">◈</div>
+                        <h3>Aún no tienes grupos</h3>
+                        <p>Crea tu primer grupo para empezar a gestionar horarios y agregar estudiantes con un código de
+                            unión.</p>
+                        <button class="btn btn-p" onclick="openModal('modal-grupo')" style="margin-top:8px">+ Crear
+                            primer grupo</button>
+                    </div>
+                </div>
+
+                <!-- Lista de grupos -->
+                <div id="grupos-lista" style="display:none">
+                    <div class="sec-row">
+                        <h2>Mis grupos</h2>
+                        <button class="btn btn-p" onclick="openModal('modal-grupo')">+ Nuevo grupo</button>
+                    </div>
+                    <div class="groups-grid" id="groups-grid"></div>
+                </div>
+            </div>
+
+            <!-- SOLICITUDES -->
+            <div class="panel" id="panel-solicitudes">
+                <h2 class="sec-title">Solicitud de rol</h2>
+                <div class="table-wrap" style="margin-bottom:20px">
+                    <div style="padding:20px 18px">
+                        <p style="font-size:13.5px;line-height:1.7;color:var(--muted)">
+                            ¿Quieres convertirte en <strong style="color:var(--text)">Administrador</strong>? Envía una
+                            solicitud al admin de la plataforma. Tu cuenta seguirá siendo de tipo Profesor hasta que sea
+                            aprobada.
+                        </p>
+                        <button class="btn btn-p" style="margin-top:16px" onclick="enviarSolicitud()">Solicitar rol de
+                            Administrador</button>
+                    </div>
+                </div>
+                <h3 style="font-size:14px;font-weight:600;margin-bottom:12px">Historial de solicitudes</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rol solicitado</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sol-tbody">
+                            <tr>
+                                <td colspan="3" style="text-align:center;color:var(--muted);padding:30px">No has enviado
+                                    solicitudes aún.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- NOTIFICACIONES -->
+            <div class="panel" id="panel-notificaciones">
+                <div class="sec-row">
+                    <h2>Notificaciones</h2>
+                    <button class="btn btn-o" onclick="markAllRead()">Marcar todas leídas</button>
+                </div>
+                <div class="table-wrap">
+                    <div class="notif-list" id="notif-list" style="padding:6px 0">
+                        <p style="color:var(--muted);padding:20px 16px;font-size:13px">No hay notificaciones.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- Modal: Crear grupo -->
+    <div class="overlay" id="modal-grupo">
+        <div class="modal">
+            <h2 id="grupo-modal-title">Crear grupo</h2>
+            <p class="sub">Define la información de tu grupo</p>
+
+            <div class="field">
+                <label>Nombre del grupo / Grado</label>
+                <input id="grp-nombre" placeholder="Ej: 10-B, 11-2, Grado 9A…" />
+                <span class="field-hint">Usa el formato de tu institución.</span>
+            </div>
+
+            <div class="field">
+                <label>Clase que imparte</label>
+                <input id="grp-clase" placeholder="Ej: Matemáticas, Física, Programación…" />
+            </div>
+
+            <div class="field-row">
+                <div class="field">
+                    <label>Hora de inicio</label>
+                    <input type="time" id="grp-hora-inicio" value="07:00" />
+                </div>
+                <div class="field">
+                    <label>Hora de fin</label>
+                    <input type="time" id="grp-hora-fin" value="09:00" />
+                </div>
+            </div>
+
+            <div class="field-row">
+                <div class="field">
+                    <label>Días de clase</label>
+                    <input id="grp-dias" placeholder="Ej: Lunes, Miércoles, Viernes" />
+                </div>
+                <div class="field">
+                    <label>Cupo máximo</label>
+                    <input type="number" id="grp-cupo" placeholder="30" min="1" />
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Descripción (opcional)</label>
+                <textarea id="grp-desc" rows="2" placeholder="Cualquier información adicional…"></textarea>
+            </div>
+
+            <div class="modal-foot">
+                <button class="btn btn-o" onclick="closeModal('modal-grupo')">Cancelar</button>
+                <button class="btn btn-p" onclick="crearGrupo()">Crear grupo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Ver grupo (detalle) -->
+    <div class="overlay" id="modal-detalle">
+        <div class="modal">
+            <h2 id="det-nombre">Detalle del grupo</h2>
+            <p class="sub" id="det-clase">—</p>
+
+            <div class="code-preview">
+                <div class="lbl">Código de unión</div>
+                <div class="val" id="det-code">——</div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+                <div class="group-card-row"><span>🕐</span> <span>Horario: <strong id="det-horario">—</strong></span>
+                </div>
+                <div class="group-card-row"><span>📅</span> <span>Días: <strong id="det-dias">—</strong></span></div>
+                <div class="group-card-row"><span>👥</span> <span>Miembros: <strong id="det-miembros">0</strong> /
+                        <strong id="det-cupo">—</strong></span></div>
+            </div>
+
+            <h3
+                style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">
+                Estudiantes</h3>
+            <div class="table-wrap" style="margin-bottom:20px">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="det-tbody">
+                        <tr>
+                            <td colspan="3" style="text-align:center;color:var(--muted);padding:20px;font-size:13px">
+                                Nadie se ha unido aún.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="modal-foot">
+                <button class="btn btn-d btn-sm" id="btn-eliminar-grupo" onclick="eliminarGrupo()">Eliminar
+                    grupo</button>
+                <button class="btn btn-o" onclick="closeModal('modal-detalle')">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estado
+        const grupos = [];
+        let grupoActivo = null; // id del grupo en detalle
+
+        /* NAVEGACIÓN */
+        const panelMeta = {
+            grupos: { title: 'Mis grupos', sub: 'Gestiona tus grupos y horarios' },
+            solicitudes: { title: 'Solicitudes', sub: 'Solicita cambios de rol al administrador' },
+            notificaciones: { title: 'Notificaciones', sub: 'Mensajes del sistema' },
+        };
+
+        function go(name, btn) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+            document.getElementById('panel-' + name).classList.add('active');
+            if (btn) btn.classList.add('active');
+            const m = panelMeta[name] || { title: name, sub: '' };
+            document.getElementById('tb-title').textContent = m.title;
+            document.getElementById('tb-sub').textContent = m.sub;
+            // Mostrar botón crear grupo solo en panel grupos
+            document.getElementById('btn-crear-grupo').style.display = (name === 'grupos' && grupos.length > 0) ? 'flex' : 'none';
+        }
+
+        /* MODALS */
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+        document.querySelectorAll('.overlay').forEach(o => {
+            o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+        });
+
+        /* GENERAR CÓDIGO */
+        function generarCodigo() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+            return code;
+        }
+
+        /* CREAR GRUPO */
+        function crearGrupo() {
+            const nombre = document.getElementById('grp-nombre').value.trim();
+            const clase = document.getElementById('grp-clase').value.trim();
+            const horaInicio = document.getElementById('grp-hora-inicio').value;
+            const horaFin = document.getElementById('grp-hora-fin').value;
+            const dias = document.getElementById('grp-dias').value.trim();
+            const cupo = parseInt(document.getElementById('grp-cupo').value) || 0;
+            const desc = document.getElementById('grp-desc').value.trim();
+
+            if (!nombre) { alert('El nombre del grupo es requerido.'); return; }
+            if (!clase) { alert('La clase que impartes es requerida.'); return; }
+            if (horaInicio >= horaFin) { alert('La hora inicio debe ser antes de la hora fin.'); return; }
+
+            const grupo = {
+                id: 'g-' + Date.now(),
+                nombre,
+                clase,
+                horaInicio,
+                horaFin,
+                dias: dias || 'No especificado',
+                cupo,
+                desc,
+                codigo: generarCodigo(),
+                miembros: [],
+                creado: new Date().toLocaleDateString('es-CO')
+            };
+
+            grupos.push(grupo);
+            renderGrupos();
+            closeModal('modal-grupo');
+            limpiarFormGrupo();
+            // TODO: POST /api/grupos
+        }
+
+        function limpiarFormGrupo() {
+            ['grp-nombre', 'grp-clase', 'grp-dias', 'grp-desc'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('grp-cupo').value = '';
+            document.getElementById('grp-hora-inicio').value = '07:00';
+            document.getElementById('grp-hora-fin').value = '09:00';
+        }
+
+        /* RENDER GRUPOS */
+        function renderGrupos() {
+            const vacio = document.getElementById('grupos-vacio');
+            const lista = document.getElementById('grupos-lista');
+            const grid = document.getElementById('groups-grid');
+            const btnTop = document.getElementById('btn-crear-grupo');
+
+            if (grupos.length === 0) {
+                vacio.style.display = 'block';
+                lista.style.display = 'none';
+                btnTop.style.display = 'none';
+                return;
+            }
+
+            vacio.style.display = 'none';
+            lista.style.display = 'block';
+            btnTop.style.display = 'flex';
+
+            grid.innerHTML = grupos.map(g => `
+  <div class="group-card">
+    <div class="group-card-header">
+      <div class="group-card-name">${g.nombre}</div>
+      <div class="group-card-badge">${g.clase}</div>
+    </div>
+    <div class="group-card-meta">
+      <div class="group-card-row"><span>🕐</span> <span>${g.horaInicio} – ${g.horaFin}</span></div>
+      <div class="group-card-row"><span>📅</span> <span>${g.dias}</span></div>
+      <div class="group-card-row"><span>👥</span> <span>${g.miembros.length}${g.cupo ? ' / ' + g.cupo : ''} estudiantes</span></div>
+    </div>
+    <div class="code-box">
+      <div>
+        <div class="code-label">Código de unión</div>
+        <div class="code-value">${g.codigo}</div>
+      </div>
+      <button class="code-copy" onclick="copiarCodigo('${g.codigo}')" title="Copiar código">⎘</button>
+    </div>
+    <div class="group-card-actions">
+      <button class="btn btn-o btn-sm" onclick="verGrupo('${g.id}')">Ver detalle</button>
+      <button class="btn btn-d btn-sm" onclick="confirmarEliminar('${g.id}')">Eliminar</button>
+    </div>
+  </div>`).join('');
+        }
+
+        /* COPIAR CÓDIGO */
+        function copiarCodigo(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                mostrarToast('✓ Código copiado: ' + code);
+            }).catch(() => {
+                mostrarToast('Código: ' + code);
+            });
+        }
+
+        /* VER DETALLE */
+        function verGrupo(id) {
+            const g = grupos.find(x => x.id === id);
+            if (!g) return;
+            grupoActivo = id;
+            document.getElementById('det-nombre').textContent = g.nombre;
+            document.getElementById('det-clase').textContent = g.clase;
+            document.getElementById('det-code').textContent = g.codigo;
+            document.getElementById('det-horario').textContent = `${g.horaInicio} – ${g.horaFin}`;
+            document.getElementById('det-dias').textContent = g.dias;
+            document.getElementById('det-miembros').textContent = g.miembros.length;
+            document.getElementById('det-cupo').textContent = g.cupo || 'Sin límite';
+            const tbody = document.getElementById('det-tbody');
+            if (g.miembros.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Nadie se ha unido aún.</td></tr>';
+            } else {
+                tbody.innerHTML = g.miembros.map(m => `
+  <tr>
+    <td>${m.nombre}</td>
+    <td>${m.correo || '—'}</td>
+    <td><span class="badge badge-act">Activo</span></td>
+  </tr>`).join('');
+            }
+            openModal('modal-detalle');
+        }
+
+        /* ELIMINAR GRUPO */
+        function confirmarEliminar(id) {
+            if (!confirm('¿Eliminar este grupo? Esta acción no se puede deshacer.')) return;
+            const idx = grupos.findIndex(g => g.id === id);
+            if (idx > -1) grupos.splice(idx, 1);
+            renderGrupos();
+            // TODO: DELETE /api/grupos/:id
+        }
+
+        function eliminarGrupo() {
+            if (!grupoActivo) return;
+            closeModal('modal-detalle');
+            confirmarEliminar(grupoActivo);
+            grupoActivo = null;
+        }
+
+        /* SOLICITUDES */
+        function enviarSolicitud() {
+            const tbody = document.getElementById('sol-tbody');
+            const emptyRow = tbody.querySelector('td[colspan]');
+            if (emptyRow) emptyRow.closest('tr').remove();
+            const tr = document.createElement('tr');
+            const fecha = new Date().toLocaleDateString('es-CO');
+            tr.innerHTML = `
+  <td>Administrador</td>
+  <td>${fecha}</td>
+  <td><span class="badge badge-pend">Pendiente</span></td>`;
+            tbody.appendChild(tr);
+            mostrarToast('✓ Solicitud enviada al administrador');
+            // TODO: POST /api/v1/admin/solicitudes/crear.php
+        }
+
+        /* NOTIFICACIONES */
+        function markAllRead() {
+            document.querySelectorAll('.notif-dot').forEach(d => d.classList.add('read'));
+        }
+
+        /* TOAST */
+        function mostrarToast(msg) {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2800);
+        }
+
+        /* INIT */
+        renderGrupos();
+    </script>
+</body>
+
+</html>
