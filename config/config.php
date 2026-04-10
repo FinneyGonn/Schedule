@@ -14,6 +14,7 @@ define('DB_PASS', '');
 define('DB_NAME', 'horarios');
 
 try {
+    // 1. Mantener tu PDO (por si el login lo usa)
     $pdo = new PDO(
         "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", 
         DB_USER, 
@@ -21,10 +22,18 @@ try {
     );
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-} catch(PDOException $e) {
+
+    // 2. AGREGAR MySQLi (la variable $conn que piden stats.php y usuarios.php)
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+    $conn->set_charset("utf8mb4");
+
+    if ($conn->connect_error) {
+        throw new Exception($conn->connect_error);
+    }
+
+} catch(Exception $e) {
     http_response_code(500);
-    // Usamos el mismo formato de respuesta para errores de conexión
-    echo json_encode(['ok' => false, 'mensaje' => 'Error de conexión a la base de datos']);
+    echo json_encode(['ok' => false, 'mensaje' => 'Error de conexión: ' . $e->getMessage()]);
     exit();
 }
 
