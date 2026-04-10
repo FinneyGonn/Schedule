@@ -596,7 +596,7 @@
             const formData = new FormData();
             formData.append('correo', correo);
             formData.append('contrasena', contrasena);
-            fetch('api/login.php', {
+            fetch('api/v1/admin/login.php', {
                 method: 'POST',
                 body: formData
             })
