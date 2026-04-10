@@ -597,7 +597,7 @@
             formData.append('correo', correo);
             formData.append('contrasena', contrasena);
 
-            fetch('api/v1/login.php', {
+            fetch('api/v1/admin/login.php', {
                 method: 'POST',
                 body: formData
             })
@@ -659,7 +659,7 @@
             formData.append('contrasena', contrasena);
 
             // Ajustamos la ruta a tu estructura actual
-            fetch('api/v1/register.php', {
+            fetch('api/v1/admin/register.php', {
                 method: 'POST',
                 body: formData
             })
