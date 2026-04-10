@@ -1293,409 +1293,222 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol_id'] != 1) {
     </div>
 
     <script>
-        const COLORS = { c0: '#c8a96e', c1: '#64a0dc', c2: '#78c88c', c3: '#c878b4', c4: '#dc9664', c5: '#a08cdc', c6: '#60c8c0', c7: '#e0b060' };
+    const COLORS = { c0: '#c8a96e', c1: '#64a0dc', c2: '#78c88c', c3: '#c878b4', c4: '#dc9664', c5: '#a08cdc', c6: '#60c8c0', c7: '#e0b060' };
 
-        // Estado de la app (todo vacío al inicio)
-        const grupos = [];
-        const salonesData = [];
-        const schedData = {};
+    // Estado de la app
+    const grupos = [];
+    const salonesData = [];
+    const schedData = {};
 
-        let selectedColor = 'c0';
-        let editingBlock = null;
-        let clickedCell = null;
+    let selectedColor = 'c0';
+    let editingBlock = null;
+    let clickedCell = null;
 
-        /* NAVEGACIÓN */
-        const panelMeta = {
-            home: { title: 'Resumen', sub: 'Panel de administración' },
-            horario: { title: 'Gestión de Horarios', sub: 'Crea y edita bloques por grupo' },
-            usuarios: { title: 'Usuarios', sub: 'Gestiona cuentas y roles' },
-            grupos: { title: 'Grupos', sub: 'Organiza grupos y asignaciones' },
-            salones: { title: 'Salones', sub: 'Administra aulas y disponibilidad' },
-            solicitudes: { title: 'Solicitudes de Rol', sub: 'Aprueba o rechaza cambios de rol' },
-            notificaciones: { title: 'Notificaciones', sub: 'Mensajes del sistema' },
-        };
+    /* NAVEGACIÓN */
+    const panelMeta = {
+        home: { title: 'Resumen', sub: 'Panel de administración' },
+        horario: { title: 'Gestión de Horarios', sub: 'Crea y edita bloques por grupo' },
+        usuarios: { title: 'Usuarios', sub: 'Gestiona cuentas y roles' },
+        grupos: { title: 'Grupos', sub: 'Organiza grupos y asignaciones' },
+        salones: { title: 'Salones', sub: 'Administra aulas y disponibilidad' },
+        solicitudes: { title: 'Solicitudes de Rol', sub: 'Aprueba o rechaza cambios de rol' },
+        notificaciones: { title: 'Notificaciones', sub: 'Mensajes del sistema' },
+    };
 
-        function go(name, btn) {
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
-            document.getElementById('panel-' + name).classList.add('active');
-            if (btn) btn.classList.add('active');
-            const m = panelMeta[name] || { title: name, sub: '' };
-            document.getElementById('tb-title').textContent = m.title;
-            document.getElementById('tb-sub').textContent = m.sub;
-            if (name === 'notificaciones') { const b = document.getElementById('notif-badge'); if (b) b.remove(); }
-            if (name === 'horario') renderSchedPanel();
-        }
+    function go(name, btn) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+        document.getElementById('panel-' + name).classList.add('active');
+        if (btn) btn.classList.add('active');
+        const m = panelMeta[name] || { title: name, sub: '' };
+        document.getElementById('tb-title').textContent = m.title;
+        document.getElementById('tb-sub').textContent = m.sub;
+        if (name === 'notificaciones') { const b = document.getElementById('notif-badge'); if (b) b.remove(); }
+        if (name === 'horario') renderSchedPanel();
+    }
 
-        /* PANEL HORARIO */
-        function renderSchedPanel() {
-            const noGroups = document.getElementById('sched-no-groups');
-            const schedCont = document.getElementById('sched-content');
-            if (grupos.length === 0) {
-                noGroups.style.display = 'block';
-                schedCont.style.display = 'none';
+    /* --- NUEVA FUNCIÓN: CARGAR USUARIOS DESDE API --- */
+    const cargarUsuarios = async () => {
+        const tbody = document.getElementById('usr-tbody');
+        if (!tbody) return;
+
+        try {
+            // Usamos ruta relativa para evitar el error 404 de localhost
+            const resp = await fetch('api/v1/admin/usuarios.php');
+            if (!resp.ok) throw new Error('No se pudo obtener la lista de usuarios');
+            
+            const data = await resp.json();
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--muted)">No hay usuarios registrados.</td></tr>';
                 return;
             }
-            noGroups.style.display = 'none';
-            schedCont.style.display = 'block';
-            const sel = document.getElementById('sched-grupo');
-            sel.innerHTML = grupos.map(g => `<option value="${g.id}">${g.nombre}</option>`).join('');
-            renderSched();
-        }
 
-        /* HORARIO RENDER */
-        const DIAS = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
-        const DIAS_LABEL = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-
-        function currentGrupo() { return document.getElementById('sched-grupo').value; }
-
-        function buildHoras() {
-            const arr = [];
-            for (let h = 6; h < 20; h++) arr.push(String(h).padStart(2, '0') + ':00');
-            return arr;
-        }
-
-        function getBlocks(dia, hora) {
-            return (schedData[currentGrupo()] || []).filter(b => b.dia === dia && b.hora_inicio === hora);
-        }
-
-        function renderSched() {
-            const horas = buildHoras();
-            const head = document.getElementById('sched-head');
-            const body = document.getElementById('sched-body');
-            head.innerHTML = '<tr><th>Hora</th>' + DIAS_LABEL.map(d => `<th>${d}</th>`).join('') + '</tr>';
-            const occ = {};
-            body.innerHTML = '';
-            horas.forEach(hora => {
-                const tr = document.createElement('tr');
-                const td0 = document.createElement('td');
-                td0.className = 'time-lbl';
-                td0.textContent = hora;
-                tr.appendChild(td0);
-                DIAS.forEach(dia => {
-                    const key = `${dia}-${hora}`;
-                    if (occ[key]) return;
-                    const blocks = getBlocks(dia, hora);
-                    const td = document.createElement('td');
-                    td.className = 'sc';
-                    if (blocks.length) {
-                        const b = blocks[0];
-                        const sh = parseInt(b.hora_inicio);
-                        const eh = parseInt(b.hora_fin);
-                        const span = eh - sh;
-                        if (span > 1) {
-                            td.rowSpan = span;
-                            for (let i = 1; i < span; i++) occ[`${dia}-${String(sh + i).padStart(2, '0')}:00`] = true;
-                        }
-                        const col = COLORS[b.color] || COLORS.c0;
-                        const colA = col + '28';
-                        const idx = (schedData[currentGrupo()] || []).indexOf(b);
-                        td.innerHTML = `
-  <div class="blk" style="background:${colA};border-left:3px solid ${col};color:${col}" onclick="editBlock(${idx})">
-    <span class="blk-name">${b.nombre}</span>
-    <span class="blk-info">📍 ${b.salon} · ${b.hora_inicio}–${b.hora_fin}</span>
-    <span class="blk-info">${b.profesor}</span>
-    <button class="blk-del" onclick="deleteBlock(event,${idx})">✕</button>
-  </div>`;
-                    } else {
-                        td.innerHTML = `<span class="add-hint">+</span>`;
-                        td.onclick = () => { clickedCell = { dia, hora }; abrirModalBloque(true); };
-                    }
-                    tr.appendChild(td);
-                });
-                body.appendChild(tr);
-            });
-        }
-
-        /* BLOQUES CRUD */
-        function abrirModalBloque(fromCell) {
-            editingBlock = null;
-            document.getElementById('bloque-modal-title').textContent = 'Agregar bloque';
-            document.getElementById('blk-nombre').value = '';
-            document.getElementById('blk-inicio').value = '07:00';
-            document.getElementById('blk-fin').value = '09:00';
-            if (fromCell && clickedCell) {
-                document.getElementById('blk-dia').value = clickedCell.dia;
-                document.getElementById('blk-inicio').value = clickedCell.hora;
-                const h = parseInt(clickedCell.hora);
-                document.getElementById('blk-fin').value = String(h + 1).padStart(2, '0') + ':00';
-            }
-            openModal('modal-bloque');
-        }
-
-        function addBlock() {
-            const nombre = document.getElementById('blk-nombre').value.trim();
-            const dia = document.getElementById('blk-dia').value;
-            const salon = document.getElementById('blk-salon').value;
-            const inicio = document.getElementById('blk-inicio').value;
-            const fin = document.getElementById('blk-fin').value;
-            const profesor = document.getElementById('blk-prof').value;
-            if (!nombre || !inicio || !fin) { alert('Completa todos los campos.'); return; }
-            if (inicio >= fin) { alert('La hora inicio debe ser antes de la hora fin.'); return; }
-            const g = currentGrupo();
-            if (!schedData[g]) schedData[g] = [];
-            if (editingBlock !== null) {
-                schedData[g][editingBlock] = { dia, hora_inicio: inicio, hora_fin: fin, nombre, salon, profesor, color: selectedColor };
-                editingBlock = null;
-            } else {
-                schedData[g].push({ dia, hora_inicio: inicio, hora_fin: fin, nombre, salon, profesor, color: selectedColor });
-            }
-            closeModal('modal-bloque');
-            renderSched();
-            // TODO: POST /api/horarios
-        }
-
-        function editBlock(idx) {
-            const g = currentGrupo();
-            const b = schedData[g][idx];
-            editingBlock = idx;
-            document.getElementById('bloque-modal-title').textContent = 'Editar bloque';
-            document.getElementById('blk-nombre').value = b.nombre;
-            document.getElementById('blk-dia').value = b.dia;
-            document.getElementById('blk-salon').value = b.salon;
-            document.getElementById('blk-inicio').value = b.hora_inicio;
-            document.getElementById('blk-fin').value = b.hora_fin;
-            document.getElementById('blk-prof').value = b.profesor;
-            selectedColor = b.color || 'c0';
-            document.querySelectorAll('.cp').forEach(c => c.classList.toggle('sel', c.dataset.c === selectedColor));
-            openModal('modal-bloque');
-        }
-
-        function deleteBlock(e, idx) {
-            e.stopPropagation();
-            if (!confirm('¿Eliminar este bloque?')) return;
-            schedData[currentGrupo()].splice(idx, 1);
-            renderSched();
-        }
-
-        function clearSched() {
-            if (!confirm('¿Limpiar todo el horario de este grupo?')) return;
-            schedData[currentGrupo()] = [];
-            renderSched();
-        }
-
-        /* MODALS */
-        function openModal(id) { document.getElementById(id).classList.add('open'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('open'); clickedCell = null; }
-
-        document.querySelectorAll('.overlay').forEach(o => {
-            o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
-        });
-
-        function selectColor(el) {
-            document.querySelectorAll('.cp').forEach(c => c.classList.remove('sel'));
-            el.classList.add('sel');
-            selectedColor = el.dataset.c;
-        }
-
-        /* USUARIOS */
-        function saveUsuario() {
-            const n = document.getElementById('usr-nombre').value.trim();
-            const a = document.getElementById('usr-apellido').value.trim();
-            if (!n || !a) { alert('Completa nombre y apellido.'); return; }
-            const rolVal = document.getElementById('usr-rol').value;
-            const rolMap = { '1': 'Admin', '2': 'Profesor', '3': 'Estudiante' };
-            const badgeMap = { '1': 'badge-admin', '2': 'badge-prof', '3': 'badge-est' };
-            const emptyRow = document.querySelector('#usr-tbody td[colspan]');
-            if (emptyRow) emptyRow.closest('tr').remove();
-            const tbody = document.getElementById('usr-tbody');
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-  <td>${n} ${a}</td>
-  <td>${document.getElementById('usr-nick').value}</td>
-  <td>${document.getElementById('usr-correo').value}</td>
-  <td><span class="badge ${badgeMap[rolVal]}">${rolMap[rolVal]}</span></td>
-  <td><span class="badge badge-act">Activo</span></td>
-  <td><div class="actions-cell"><button class="btn btn-o btn-sm">Editar</button><button class="btn btn-d btn-sm">Desactivar</button></div></td>`;
-            tbody.appendChild(tr);
-            if (rolVal === '2') {
-                const nombre = `${n} ${a}`;
-                ['grp-prof', 'blk-prof'].forEach(id => {
-                    const sel = document.getElementById(id);
-                    const opt = document.createElement('option');
-                    opt.value = opt.textContent = nombre;
-                    sel.appendChild(opt);
-                });
-            }
-            closeModal('modal-usuario');
-            ['usr-nombre', 'usr-apellido', 'usr-nick', 'usr-correo', 'usr-pass'].forEach(id => document.getElementById(id).value = '');
-            // TODO: POST /api/usuarios
-        }
-
-        /* GRUPOS */
-        function saveGrupo() {
-            const n = document.getElementById('grp-nombre').value.trim();
-            if (!n) { alert('El nombre del grupo es requerido.'); return; }
-            const id = 'grp-' + Date.now();
-            const desc = document.getElementById('grp-desc').value.trim();
-            const prof = document.getElementById('grp-prof').value || 'Sin asignar';
-            grupos.push({ id, nombre: n, desc, prof });
-            schedData[id] = [];
-            const emptyRow = document.getElementById('grp-empty-row');
-            if (emptyRow) emptyRow.remove();
-            const tbody = document.getElementById('grp-tbody');
-            const tr = document.createElement('tr');
-            tr.dataset.groupId = id;
-            tr.innerHTML = `
-  <td><strong>${n}</strong></td>
-  <td>${desc || '—'}</td>
-  <td>0</td>
-  <td>${prof}</td>
-  <td><div class="actions-cell">
-    <button class="btn btn-o btn-sm">Editar</button>
-    <button class="btn btn-o btn-sm">Miembros</button>
-    <button class="btn btn-d btn-sm" onclick="deleteGrupo('${id}',this)">Eliminar</button>
-  </div></td>`;
-            tbody.appendChild(tr);
-            closeModal('modal-grupo');
-            document.getElementById('grp-nombre').value = '';
-            document.getElementById('grp-desc').value = '';
-            // TODO: POST /api/grupos
-        }
-
-        function deleteGrupo(id, btn) {
-            if (!confirm('¿Eliminar este grupo? Su horario también se borrará.')) return;
-            const idx = grupos.findIndex(g => g.id === id);
-            if (idx > -1) grupos.splice(idx, 1);
-            delete schedData[id];
-            btn.closest('tr').remove();
-            if (document.getElementById('grp-tbody').children.length === 0) {
-                const tr = document.createElement('tr');
-                tr.id = 'grp-empty-row';
-                tr.innerHTML = `<td colspan="5" style="text-align:center;color:var(--muted);padding:30px">No hay grupos creados. Usa <strong>+ Nuevo grupo</strong> para comenzar.</td>`;
-                document.getElementById('grp-tbody').appendChild(tr);
-            }
-        }
-
-        /* SALONES */
-        function saveSalon() {
-            const n = document.getElementById('sal-nombre').value.trim();
-            const c = parseInt(document.getElementById('sal-cap').value);
-            if (!n || !c || c < 1) { alert('Completa todos los campos correctamente.'); return; }
-            salonesData.push({ nombre: n, cap: c, occ: 0 });
-            const emptyRow = document.querySelector('#sal-tbody td[colspan]');
-            if (emptyRow) emptyRow.closest('tr').remove();
-            const tbody = document.getElementById('sal-tbody');
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-  <td>${n}</td><td>${c}</td>
-  <td><span class="badge badge-act">Disponible</span></td>
-  <td><div class="actions-cell"><button class="btn btn-o btn-sm">Editar</button><button class="btn btn-d btn-sm">Eliminar</button></div></td>`;
-            tbody.appendChild(tr);
-            const blkSalon = document.getElementById('blk-salon');
-            const firstOpt = blkSalon.querySelector('option[value=""]');
-            if (firstOpt) firstOpt.remove();
-            const opt = document.createElement('option');
-            opt.value = opt.textContent = n;
-            blkSalon.appendChild(opt);
-            renderAvail();
-            closeModal('modal-salon');
-            document.getElementById('sal-nombre').value = '';
-            document.getElementById('sal-cap').value = '';
-        }
-
-        /* SOLICITUDES */
-        function approveSol(btn) {
-            const tr = btn.closest('tr');
-            tr.querySelector('td:nth-child(5)').innerHTML = '<span class="badge badge-act">Aprobado</span>';
-            tr.querySelector('.actions-cell').innerHTML = '';
-            const b = document.getElementById('sol-badge');
-            if (b) { const n = parseInt(b.textContent) - 1; if (n <= 0) b.remove(); else b.textContent = n; }
-        }
-        function rejectSol(btn) {
-            const tr = btn.closest('tr');
-            tr.querySelector('td:nth-child(5)').innerHTML = '<span class="badge badge-inac">Rechazado</span>';
-            tr.querySelector('.actions-cell').innerHTML = '';
-            const b = document.getElementById('sol-badge');
-            if (b) { const n = parseInt(b.textContent) - 1; if (n <= 0) b.remove(); else b.textContent = n; }
-        }
-
-        /* NOTIFICACIONES */
-        function markAllRead() {
-            document.querySelectorAll('.notif-dot').forEach(d => d.classList.add('read'));
-        }
-
-        /* BÚSQUEDA */
-        function filterTable(tbodyId, inputId) {
-            const q = document.getElementById(inputId).value.toLowerCase();
-            document.querySelectorAll('#' + tbodyId + ' tr').forEach(tr => {
-                tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
-            });
-        }
-
-        /* DISPONIBILIDAD */
-        function renderAvail() {
-            const g = document.getElementById('avail-grid');
-            if (salonesData.length === 0) {
-                g.innerHTML = '<p style="color:var(--muted);font-size:13px;grid-column:1/-1">No hay salones registrados aún.</p>';
-                return;
-            }
-            g.innerHTML = salonesData.map(s => {
-                const pct = Math.round(s.occ / s.cap * 100);
-                const busy = pct >= 100;
-                return `<div class="avail-card"><h4>${s.nombre}</h4><div class="cap">${s.occ}/${s.cap} lugares · ${pct}%</div><div class="avail-bar-wrap"><div class="avail-bar${busy ? ' busy' : ''}" style="width:${Math.min(pct, 100)}%"></div></div></div>`;
+            tbody.innerHTML = data.map(u => {
+                // Definir clase de color según rol_id (1:Admin, 2:Prof, 3:Est)
+                const badgeClass = u.rol_id == 1 ? 'badge-admin' : (u.rol_id == 2 ? 'badge-prof' : 'badge-est');
+                
+                return `
+                    <tr>
+                        <td>${u.nombre} ${u.apellido}</td>
+                        <td>${u.nickname || u.usuario}</td>
+                        <td>${u.correo}</td>
+                        <td><span class="badge ${badgeClass}">${u.rol}</span></td>
+                        <td><span class="badge badge-act">Activo</span></td>
+                        <td>
+                            <div class="actions-cell">
+                                <button class="btn btn-o btn-sm" onclick="editUser(${u.id})">Editar</button>
+                                <button class="btn btn-d btn-sm">Desactivar</button>
+                            </div>
+                        </td>
+                    </tr>`;
             }).join('');
+        } catch (e) {
+            console.error("Error al cargar usuarios:", e);
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--danger)">Error al conectar con el servidor.</td></tr>';
         }
+    };
 
-        /* BACKEND */
-        const cargarEstadisticas = async () => {
-            try {
-                // Ajusta la ruta si tu admin.html está en una subcarpeta
-                const resp = await fetch('api/v1/admin/stats.php');
-                if (!resp.ok) throw new Error('Error en la red');
+    /* PANEL HORARIO */
+    function renderSchedPanel() {
+        const noGroups = document.getElementById('sched-no-groups');
+        const schedCont = document.getElementById('sched-content');
+        if (grupos.length === 0) {
+            if(noGroups) noGroups.style.display = 'block';
+            if(schedCont) schedCont.style.display = 'none';
+            return;
+        }
+        if(noGroups) noGroups.style.display = 'none';
+        if(schedCont) schedCont.style.display = 'block';
+        const sel = document.getElementById('sched-grupo');
+        sel.innerHTML = grupos.map(g => `<option value="${g.id}">${g.nombre}</option>`).join('');
+        renderSched();
+    }
 
-                const data = await resp.json();
+    /* HORARIO RENDER */
+    const DIAS = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+    const DIAS_LABEL = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
-                // Mapeo de lo que envía PHP vs IDs en el HTML
-                const ids = {
-                    total_usuarios: 'count-usuarios',
-                    total_profesores: 'count-profesores',
-                    total_solicitudes: 'count-solicitudes',
-                    total_salones: 'count-salones', // Ahora coincide con la tabla 'aulas'
-                    total_horarios: 'count-horarios'  // Ahora coincide con la tabla 'clases'
-                };
+    function currentGrupo() { return document.getElementById('sched-grupo').value; }
 
-                Object.keys(ids).forEach(k => {
-                    const el = document.getElementById(ids[k]);
-                    if (el && data[k] !== undefined) {
-                        el.textContent = data[k];
+    function buildHoras() {
+        const arr = [];
+        for (let h = 6; h < 20; h++) arr.push(String(h).padStart(2, '0') + ':00');
+        return arr;
+    }
+
+    function getBlocks(dia, hora) {
+        return (schedData[currentGrupo()] || []).filter(b => b.dia === dia && b.hora_inicio === hora);
+    }
+
+    function renderSched() {
+        const horas = buildHoras();
+        const head = document.getElementById('sched-head');
+        const body = document.getElementById('sched-body');
+        if(!head || !body) return;
+        
+        head.innerHTML = '<tr><th>Hora</th>' + DIAS_LABEL.map(d => `<th>${d}</th>`).join('') + '</tr>';
+        const occ = {};
+        body.innerHTML = '';
+        horas.forEach(hora => {
+            const tr = document.createElement('tr');
+            const td0 = document.createElement('td');
+            td0.className = 'time-lbl';
+            td0.textContent = hora;
+            tr.appendChild(td0);
+            DIAS.forEach(dia => {
+                const key = `${dia}-${hora}`;
+                if (occ[key]) return;
+                const blocks = getBlocks(dia, hora);
+                const td = document.createElement('td');
+                td.className = 'sc';
+                if (blocks.length) {
+                    const b = blocks[0];
+                    const sh = parseInt(b.hora_inicio);
+                    const eh = parseInt(b.hora_fin);
+                    const span = eh - sh;
+                    if (span > 1) {
+                        td.rowSpan = span;
+                        for (let i = 1; i < span; i++) occ[`${dia}-${String(sh + i).padStart(2, '0')}:00`] = true;
                     }
-                });
-            } catch (e) {
-                console.error('Error al cargar stats:', e);
-            }
-        };
-
-        const cargarActividad = async () => {
-            const lista = document.querySelector('.activity-list');
-            if (!lista) return;
-            try {
-                const resp = await fetch('api/v1/admin/actividad.php');
-                const data = await resp.json();
-
-                if (!data || data.length === 0) {
-                    lista.innerHTML = '<p style="color:var(--muted);padding:16px;font-size:13px">No hay actividad reciente.</p>';
-                    return;
+                    const col = COLORS[b.color] || COLORS.c0;
+                    const colA = col + '28';
+                    const idx = (schedData[currentGrupo()] || []).indexOf(b);
+                    td.innerHTML = `
+                        <div class="blk" style="background:${colA};border-left:3px solid ${col};color:${col}" onclick="editBlock(${idx})">
+                            <span class="blk-name">${b.nombre}</span>
+                            <span class="blk-info">📍 ${b.salon} · ${b.hora_inicio}–${b.hora_fin}</span>
+                            <span class="blk-info">${b.profesor}</span>
+                            <button class="blk-del" onclick="deleteBlock(event,${idx})">✕</button>
+                        </div>`;
+                } else {
+                    td.innerHTML = `<span class="add-hint">+</span>`;
+                    td.onclick = () => { clickedCell = { dia, hora }; abrirModalBloque(true); };
                 }
+                tr.appendChild(td);
+            });
+            body.appendChild(tr);
+        });
+    }
 
-                lista.innerHTML = data.map(item => `
-            <div class="notif-item">
-                <span class="notif-dot ${item.estado !== 'pendiente' ? 'read' : ''}"></span>
-                <div class="notif-body">
-                    <div class="notif-msg">
-                        <strong>${item.nombre}</strong> solicitó cambio de rol a <strong>${item.nombre_rol}</strong>
-                    </div>
-                    <div class="notif-time">
-                        Estado: <span class="badge ${item.estado === 'pendiente' ? 'badge-warn' : 'badge-act'}">${item.estado}</span> 
-                        · ${item.created_at}
-                    </div>
-                </div>
-            </div>`).join('');
-            } catch (e) {
-                lista.innerHTML = '<p style="color:var(--muted);padding:16px;font-size:13px">Error al conectar con la API.</p>';
+    /* MODALS */
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); clickedCell = null; }
+
+    document.querySelectorAll('.overlay').forEach(o => {
+        o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+    });
+
+    /* ESTADÍSTICAS Y ACTIVIDAD (BACKEND) */
+    const cargarEstadisticas = async () => {
+        try {
+            const resp = await fetch('api/v1/admin/stats.php');
+            if (!resp.ok) throw new Error('Error en stats');
+            const data = await resp.json();
+            const ids = {
+                total_usuarios: 'count-usuarios',
+                total_profesores: 'count-profesores',
+                total_solicitudes: 'count-solicitudes',
+                total_salones: 'count-salones',
+                total_horarios: 'count-horarios'
+            };
+            Object.keys(ids).forEach(k => {
+                const el = document.getElementById(ids[k]);
+                if (el && data[k] !== undefined) el.textContent = data[k];
+            });
+        } catch (e) { console.error('Error stats:', e); }
+    };
+
+    const cargarActividad = async () => {
+        const lista = document.querySelector('.activity-list');
+        if (!lista) return;
+        try {
+            const resp = await fetch('api/v1/admin/actividad.php');
+            const data = await resp.json();
+            if (!data || data.length === 0) {
+                lista.innerHTML = '<p style="color:var(--muted);padding:16px;font-size:13px">No hay actividad reciente.</p>';
+                return;
             }
-        };
-    </script>
+            lista.innerHTML = data.map(item => `
+                <div class="notif-item">
+                    <span class="notif-dot ${item.estado !== 'pendiente' ? 'read' : ''}"></span>
+                    <div class="notif-body">
+                        <div class="notif-msg"><strong>${item.nombre}</strong> solicitó cambio de rol a <strong>${item.nombre_rol}</strong></div>
+                        <div class="notif-time">Estado: ${item.estado} · ${item.created_at}</div>
+                    </div>
+                </div>`).join('');
+        } catch (e) { console.error('Error actividad:', e); }
+    };
+
+    /* INICIALIZACIÓN */
+    document.addEventListener('DOMContentLoaded', () => {
+        // Ejecutar todas las cargas asíncronas
+        cargarEstadisticas();
+        cargarActividad();
+        cargarUsuarios(); // Carga la lista de usuarios real
+    });
+
+</script>
 </body>
 
 </html>
