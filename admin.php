@@ -1152,52 +1152,21 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
             </div>
 
             <!-- NOTIFICACIONES -->
-            <div class="panel" id="panel-notificaciones">
-                <div class="sec-row">
-                    <h2>Notificaciones</h2>
-                    <button class="btn btn-o" onclick="markAllRead()">Marcar todas leídas</button>
-                </div>
-                <div class="table-wrap">
-                    <div class="notif-list" id="notif-list" style="padding:6px 0">
-                        <p style="color:var(--muted);padding:20px 16px;font-size:13px">No hay notificaciones.</p>
-                    </div>
-                </div>
-                <div class="panel" id="panel-notificaciones">
-                <div class="sec-row">
-                    <h2>Notificaciones</h2>
-                    <button class="btn btn-o" onclick="markAllRead()">Marcar todas leídas</button>
-                </div>
-
-                <div class="table-wrap" style="margin-bottom: 24px; padding: 20px; border: 1px solid var(--border);">
-                    <h3 style="margin-bottom: 12px; font-size: 15px;">Enviar aviso directo a un usuario</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-                        <div class="field" style="margin:0">
-                            <label>ID del Usuario</label>
-                            <input type="number" id="notif-user-id" placeholder="Ej: 1" />
-                        </div>
-                        <div class="field" style="margin:0">
-                            <label>Tipo de aviso</label>
-                            <select id="notif-tipo">
-                                <option value="Sistema">Sistema</option>
-                                <option value="Urgente">Urgente</option>
-                                <option value="Aviso">Aviso General</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label>Mensaje</label>
-                        <textarea id="notif-mensaje" rows="2" placeholder="Escribe el mensaje aquí..."></textarea>
-                    </div>
-                    <button class="btn btn-p" onclick="enviarNotificacionDirecta()">Enviar Notificación</button>
-                </div>
-
-                <div class="table-wrap">
-                    <div class="notif-list" id="notif-list" style="padding:6px 0">
-                        <p style="color:var(--muted);padding:20px 16px;font-size:13px">No hay notificaciones enviadas recientemente.</p>
-                    </div>
-                </div>
-            </div>
-            </div>
+            
+<div class="panel" id="panel-notificaciones">
+    <div class="sec-row">
+        <h2>Notificaciones</h2>
+        <div style="display:flex;gap:8px">
+            <button class="btn btn-o" onclick="markAllRead()">Marcar todas leídas</button>
+            <button class="btn btn-p" onclick="openModal('modal-notif')">+ Nueva notificación</button>
+        </div>
+    </div>
+    <div class="table-wrap">
+        <div class="notif-list" id="notif-list" style="padding:6px 0">
+            <p style="color:var(--muted);padding:20px 16px;font-size:13px">No hay notificaciones enviadas.</p>
+        </div>
+    </div>
+</div>
 
         </div>
     </div>
@@ -1324,6 +1293,44 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
             </div>
         </div>
     </div>
+    <!-- Modal: Nueva Notificación (para todos) -->
+<div class="overlay" id="modal-notif">
+    <div class="modal" style="max-width:540px">
+        <h2>Nueva notificación</h2>
+        <p class="sub">El mensaje se enviará a todos los usuarios registrados</p>
+
+        <div class="field">
+            <label>Asunto</label>
+            <input id="notif-asunto" placeholder="Ej: Cambios en el horario de la semana…" />
+        </div>
+
+        <div class="field">
+            <label>Tipo</label>
+            <select id="notif-tipo-global">
+                <option value="Sistema">Sistema</option>
+                <option value="Urgente">Urgente</option>
+                <option value="Aviso">Aviso General</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Mensaje</label>
+            <textarea id="notif-mensaje-global" rows="5"
+                placeholder="Escribe aquí el contenido del mensaje que verán todos los usuarios…"
+                style="resize:vertical"></textarea>
+        </div>
+
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:4px;display:flex;align-items:center;gap:10px">
+            <span style="font-size:18px">📢</span>
+            <span style="font-size:12px;color:var(--muted);line-height:1.5">Esta notificación será visible para <strong style="color:var(--text)">todos los usuarios</strong> la próxima vez que inicien sesión.</span>
+        </div>
+
+        <div class="modal-foot">
+            <button class="btn btn-o" onclick="closeModal('modal-notif')">Cancelar</button>
+            <button class="btn btn-p" onclick="enviarNotificacionGlobal()">📨 Enviar a todos</button>
+        </div>
+    </div>
+</div>
 
     <script>
     const COLORS = { c0: '#c8a96e', c1: '#64a0dc', c2: '#78c88c', c3: '#c878b4', c4: '#dc9664', c5: '#a08cdc', c6: '#60c8c0', c7: '#e0b060' };
@@ -1540,6 +1547,49 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
         cargarActividad();
         cargarUsuarios(); // Carga la lista de usuarios real
     });
+    async function enviarNotificacionGlobal() {
+    const asunto  = document.getElementById('notif-asunto').value.trim();
+    const tipo    = document.getElementById('notif-tipo-global').value;
+    const mensaje = document.getElementById('notif-mensaje-global').value.trim();
+
+    if (!asunto)  { alert('Por favor escribe un asunto.'); return; }
+    if (!mensaje) { alert('Por favor escribe el mensaje.'); return; }
+
+    try {
+        const resp = await fetch('api/v1/admin/notificaciones.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ asunto, tipo, mensaje, destino: 'todos' })
+        });
+
+        if (!resp.ok) throw new Error('Error al enviar');
+        const data = await resp.json();
+
+        if (data.success) {
+            closeModal('modal-notif');
+            document.getElementById('notif-asunto').value = '';
+            document.getElementById('notif-mensaje-global').value = '';
+
+            // Mostrar confirmación en la lista
+            const lista = document.getElementById('notif-list');
+            const item = document.createElement('div');
+            item.className = 'notif-item';
+            item.innerHTML = `
+                <span class="notif-dot"></span>
+                <div class="notif-body">
+                    <div class="notif-msg"><strong>${asunto}</strong> — ${mensaje.substring(0, 80)}${mensaje.length > 80 ? '…' : ''}</div>
+                    <div class="notif-time">Tipo: ${tipo} · Enviado ahora · Para todos los usuarios</div>
+                </div>`;
+            if (lista.querySelector('p')) lista.innerHTML = '';
+            lista.prepend(item);
+        } else {
+            alert(data.message || 'No se pudo enviar la notificación.');
+        }
+    } catch (e) {
+        console.error('Error al enviar notificación:', e);
+        alert('Error de conexión con el servidor.');
+    }
+}
 
 </script>
 </body>
