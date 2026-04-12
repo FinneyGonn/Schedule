@@ -1418,7 +1418,7 @@
 
             try {
                 // Apuntando a tu nueva carpeta en la raiz
-                const resp = await fetch('user/notificaciones.php');
+                const resp = await fetch('api/v1/admin/notificaciones.php');
                 const data = await resp.json();
 
                 if (data.length === 0) {
