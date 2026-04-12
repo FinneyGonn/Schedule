@@ -1162,6 +1162,41 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
                         <p style="color:var(--muted);padding:20px 16px;font-size:13px">No hay notificaciones.</p>
                     </div>
                 </div>
+                <div class="panel" id="panel-notificaciones">
+                <div class="sec-row">
+                    <h2>Notificaciones</h2>
+                    <button class="btn btn-o" onclick="markAllRead()">Marcar todas leídas</button>
+                </div>
+
+                <div class="table-wrap" style="margin-bottom: 24px; padding: 20px; border: 1px solid var(--border);">
+                    <h3 style="margin-bottom: 12px; font-size: 15px;">Enviar aviso directo a un usuario</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                        <div class="field" style="margin:0">
+                            <label>ID del Usuario</label>
+                            <input type="number" id="notif-user-id" placeholder="Ej: 1" />
+                        </div>
+                        <div class="field" style="margin:0">
+                            <label>Tipo de aviso</label>
+                            <select id="notif-tipo">
+                                <option value="Sistema">Sistema</option>
+                                <option value="Urgente">Urgente</option>
+                                <option value="Aviso">Aviso General</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Mensaje</label>
+                        <textarea id="notif-mensaje" rows="2" placeholder="Escribe el mensaje aquí..."></textarea>
+                    </div>
+                    <button class="btn btn-p" onclick="enviarNotificacionDirecta()">Enviar Notificación</button>
+                </div>
+
+                <div class="table-wrap">
+                    <div class="notif-list" id="notif-list" style="padding:6px 0">
+                        <p style="color:var(--muted);padding:20px 16px;font-size:13px">No hay notificaciones enviadas recientemente.</p>
+                    </div>
+                </div>
+            </div>
             </div>
 
         </div>
