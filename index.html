@@ -596,7 +596,7 @@
             formData.append('correo', correo);
             formData.append('contrasena', contrasena);
 
-            fetch('api/login.php', {
+            fetch('/api/login.php', {
                 method: 'POST',
                 body: formData
             })
@@ -611,9 +611,9 @@
                         setTimeout(() => {
                             const rol = parseInt(data.datos?.rol_id);
                             if (rol === 1) {
-                                window.location.href = 'admin.php';
+                                window.location.replace = 'admin.php';
                             } else {
-                                window.location.href = 'user.html';
+                                window.location.replace = 'user.html';
                             }
                         }, 800);
                     } else {
@@ -653,7 +653,7 @@
             formData.append('correo', correo);
             formData.append('contrasena', contrasena);
 
-            fetch('api/register.php', {
+            fetch('/api/register.php', {
                 method: 'POST',
                 body: formData
             })
