@@ -1196,31 +1196,11 @@
             <div class="panel" id="panel-notificaciones">
                 <div class="sec-row">
                     <h2>Notificaciones</h2>
-                    <button class="btn btn-o" onclick="markAllRead()">Marcar leidas</button>
+                    <button class="btn btn-o" onclick="markAllRead()">Marcar leídas</button>
                 </div>
                 <div class="table-wrap">
                     <div class="notif-list" id="notif-list" style="padding:6px 0">
-                        <div class="notif-item"><span class="notif-dot"></span>
-                            <div class="notif-body">
-                                <div class="notif-msg">El administrador actualizo el horario del grupo
-                                    <strong>3141033</strong>
-                                </div>
-                                <div class="notif-time">Hace 30 min</div>
-                            </div>
-                        </div>
-                        <div class="notif-item"><span class="notif-dot"></span>
-                            <div class="notif-body">
-                                <div class="notif-msg">Tu solicitud para unirte al grupo <strong>3141033</strong> fue
-                                    aprobada</div>
-                                <div class="notif-time">Hace 2 horas</div>
-                            </div>
-                        </div>
-                        <div class="notif-item"><span class="notif-dot read"></span>
-                            <div class="notif-body">
-                                <div class="notif-msg">Bienvenido a la plataforma de gestion de horarios</div>
-                                <div class="notif-time">Ayer</div>
-                            </div>
-                        </div>
+                        <p style="color:var(--muted);padding:20px 16px;font-size:13px">Cargando...</p>
                     </div>
                 </div>
             </div>
@@ -1412,7 +1392,7 @@
         ══════════════════════════════════ */
         async function cargarNotificaciones() {
             try {
-                const response = await fetch('user/notificaciones.php');
+                const response = await fetch('api/v1/admin/notificaciones.php');
                 const data = await response.json();
 
                 const listaUI = document.getElementById('notif-list');
@@ -1449,6 +1429,11 @@
 
             } catch (error) {
                 console.error("Error cargando notificaciones:", error);
+            }
+            async function markAllRead() {
+                const items = document.querySelectorAll('#notif-list .notif-dot:not(.read)');
+                items.forEach(dot => dot.classList.add('read'));
+                // Opcional: llamar un endpoint para marcar en BD
             }
         }
 
