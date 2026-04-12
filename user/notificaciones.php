@@ -1,32 +1,23 @@
 <?php
-require_once '../../../config/config.php';
+// Ajusta esta ruta para que llegue a tu archivo de conexión real
+require_once '../config/config.php'; 
+
 header('Content-Type: application/json');
-
-// Usamos el ID del usuario que guardamos en la sesión al loguearnos
 session_start();
-$usuario_id = $_SESSION['user_id'] ?? null;
 
-if (!$usuario_id) {
-    echo json_encode(["error" => "No autorizado"]);
-    exit;
-}
+// Usamos el ID de la sesión. Si no existe, usamos el 1 para pruebas.
+$usuario_id = $_SESSION['user_id'] ?? 1; 
 
 try {
-    // Ajustado a tus nombres de columna: mensaje, leida, created_at
-    $query = "SELECT id, mensaje, tipo, leida, created_at 
-              FROM notificaciones 
-              WHERE usuario_id = ? 
-              ORDER BY created_at DESC";
-              
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("i", $usuario_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    $notificaciones = [];
-    while ($row = $result->fetch_assoc()) {
-        $notificaciones[] = $row;
-    }
+    // Usamos los nombres de tu tabla: mensaje, tipo, leida, created_at
+    $sql = "SELECT id, mensaje, tipo, leida, created_at 
+            FROM notificaciones 
+            WHERE usuario_id = ? 
+            ORDER BY created_at DESC";
+            
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$usuario_id]);
+    $notificaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode($notificaciones);
 
