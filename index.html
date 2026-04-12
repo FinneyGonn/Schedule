@@ -596,7 +596,7 @@
             formData.append('correo', correo);
             formData.append('contrasena', contrasena);
 
-            fetch('/api/login.php', {
+            fetch('api/login.php', {
                 method: 'POST',
                 body: formData
             })
@@ -653,7 +653,7 @@
             formData.append('correo', correo);
             formData.append('contrasena', contrasena);
 
-            fetch('/api/register.php', {
+            fetch('api/register.php', {
                 method: 'POST',
                 body: formData
             })
