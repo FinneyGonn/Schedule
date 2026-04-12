@@ -420,7 +420,6 @@
 
 <body>
     <div class="page">
-
         <div class="left">
             <div class="brand">
                 <div class="brand-icon">H</div>
@@ -445,8 +444,7 @@
                     <button class="tab" id="tab-register" onclick="switchTab('register')">Registrarse</button>
                 </div>
 
-                <!-- LOGIN -->
-                <div class="panel active" id="panel-login">
+                <form class="panel active" id="panel-login" onsubmit="event.preventDefault(); handleLogin();">
                     <h2 class="form-title">Bienvenido de nuevo</h2>
                     <p class="form-subtitle">Ingresa tus credenciales para continuar.</p>
 
@@ -456,7 +454,8 @@
                     <div class="field">
                         <label for="login-nickname">Usuario</label>
                         <div class="input-wrap">
-                            <input type="text" id="login-nickname" placeholder="correo" autocomplete="username" />
+                            <input type="text" id="login-nickname" placeholder="correo" autocomplete="username"
+                                required />
                         </div>
                     </div>
                     <div class="field">
@@ -464,20 +463,19 @@
                         <div class="input-wrap has-icon">
                             <input type="password" id="login-pass"
                                 placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
-                                autocomplete="current-password" onkeydown="if(event.key==='Enter') handleLogin()" />
+                                autocomplete="current-password" required />
                             <button class="eye-btn" onclick="togglePass('login-pass', this)"
                                 type="button">&#128065;</button>
                         </div>
                     </div>
 
-                    <button class="submit-btn" onclick="handleLogin()">Iniciar sesion</button>
+                    <button type="submit" class="submit-btn">Iniciar sesion</button>
                     <hr class="divider" />
-                    <p class="footer-note">No tienes cuenta? <button onclick="switchTab('register')">Registrate
-                            aqui</button></p>
-                </div>
+                    <p class="footer-note">No tienes cuenta? <button type="button"
+                            onclick="switchTab('register')">Registrate aqui</button></p>
+                </form>
 
-                <!-- REGISTER -->
-                <div class="panel" id="panel-register">
+                <form class="panel" id="panel-register" onsubmit="event.preventDefault(); handleRegister();">
                     <h2 class="form-title">Crear cuenta</h2>
                     <p class="form-subtitle">Completa los datos. Tu rol sera asignado por un administrador.</p>
 
@@ -487,35 +485,34 @@
                     <div class="field-row">
                         <div class="field">
                             <label for="reg-nombre">Nombre</label>
-                            <div class="input-wrap"><input type="text" id="reg-nombre" placeholder="Juan" /></div>
+                            <div class="input-wrap"><input type="text" id="reg-nombre" placeholder="Juan" required />
+                            </div>
                         </div>
                         <div class="field">
                             <label for="reg-apellido">Apellido</label>
-                            <div class="input-wrap"><input type="text" id="reg-apellido" placeholder="Perez" /></div>
+                            <div class="input-wrap"><input type="text" id="reg-apellido" placeholder="Perez" required />
+                            </div>
                         </div>
                     </div>
 
                     <div class="field">
                         <label for="reg-nickname">Nickname</label>
                         <div class="input-wrap"><input type="text" id="reg-nickname" placeholder="juan_perez"
-                                autocomplete="username" /></div>
+                                required /></div>
                     </div>
 
                     <div class="field">
                         <label for="reg-correo">Correo electronico</label>
                         <div class="input-wrap"><input type="email" id="reg-correo" placeholder="juan@correo.com"
-                                autocomplete="email" /></div>
+                                required /></div>
                     </div>
-
-                    <!-- SIN selector de rol: el backend asigna rol_id=3 (Estudiante) por defecto -->
 
                     <div class="field-row">
                         <div class="field">
                             <label for="reg-pass">Contrasena</label>
                             <div class="input-wrap has-icon">
                                 <input type="password" id="reg-pass"
-                                    placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
-                                    autocomplete="new-password" />
+                                    placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" required />
                                 <button class="eye-btn" onclick="togglePass('reg-pass', this)"
                                     type="button">&#128065;</button>
                             </div>
@@ -524,19 +521,18 @@
                             <label for="reg-confirm">Confirmar</label>
                             <div class="input-wrap has-icon">
                                 <input type="password" id="reg-confirm"
-                                    placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
-                                    autocomplete="new-password" />
+                                    placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" required />
                                 <button class="eye-btn" onclick="togglePass('reg-confirm', this)"
                                     type="button">&#128065;</button>
                             </div>
                         </div>
                     </div>
 
-                    <button class="submit-btn" onclick="handleRegister()">Crear cuenta</button>
+                    <button type="submit" class="submit-btn">Crear cuenta</button>
                     <hr class="divider" />
-                    <p class="footer-note">Ya tienes cuenta? <button onclick="switchTab('login')">Inicia sesion</button>
-                    </p>
-                </div>
+                    <p class="footer-note">Ya tienes cuenta? <button type="button" onclick="switchTab('login')">Inicia
+                            sesion</button></p>
+                </form>
             </div>
         </div>
     </div>
