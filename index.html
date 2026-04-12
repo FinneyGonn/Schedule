@@ -606,18 +606,24 @@
 
                     if (data.ok) {
                         showAlert('login-success', 'Bienvenido, redirigiendo...');
+
+                        // Guardamos en LocalStorage
                         localStorage.setItem('user', JSON.stringify(data.datos));
 
+                        // Usamos un log para confirmar que el JS llegó aquí
+                        console.log("Intentando redirigir...");
+
+                        // Forzamos la redirección sin esperas largas
                         setTimeout(() => {
-                            const rol = parseInt(data.datos?.rol_id);
-                            if (rol === 1) {
-                                window.location.replace = 'admin.php';
+                            const rol = data.datos.rol_id;
+
+                            // Comprobamos con == para que no importe si es string o número
+                            if (rol == 1) {
+                                window.location.assign('admin.php');
                             } else {
-                                window.location.replace = 'user.html';
+                                window.location.assign('user.html');
                             }
-                        }, 800);
-                    } else {
-                        showAlert('login-error', data.mensaje || 'Credenciales incorrectas.');
+                        }, 500); // 500ms es suficiente para que el usuario vea el mensaje
                     }
                 })
                 .catch(err => {
