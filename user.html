@@ -1508,50 +1508,67 @@
            NOTIFICACIONES (DATOS REALES)
         ══════════════════════════════════ */
         async function cargarNotificaciones() {
+            const listaUI = document.getElementById('notif-list');
+            if (!listaUI) return;
+            listaUI.innerHTML = '<p style="color:var(--muted);padding:20px 16px;font-size:13px">Cargando...</p>';
+
             try {
                 const response = await fetch('api/v1/admin/notificaciones.php');
+                if (!response.ok) throw new Error('HTTP ' + response.status);
                 const data = await response.json();
 
-                const listaUI = document.getElementById('notif-list');
-                if (!listaUI) return;
-
-                // Limpiamos la lista
-                listaUI.innerHTML = '';
-
-                // VALIDACIÓN CLAVE: Si data no es un array, es que hubo un error o está vacío
-                if (!Array.isArray(data)) {
-                    console.error("El servidor no envió una lista:", data);
-                    listaUI.innerHTML = `<p style="padding:20px; color:var(--muted)">No se pudieron cargar las notificaciones.</p>`;
+                if (!Array.isArray(data) || data.length === 0) {
+                    listaUI.innerHTML = '<p style="color:var(--muted);padding:20px 16px;font-size:13px">No tienes notificaciones nuevas.</p>';
                     return;
                 }
 
-                if (data.length === 0) {
-                    listaUI.innerHTML = `<p style="padding:20px; color:var(--muted)">No tienes notificaciones nuevas.</p>`;
-                    return;
-                }
+                const iconos = { Sistema: '🔧', Urgente: '🚨', Aviso: '📢' };
 
-                // Ahora sí podemos usar .map o .forEach con seguridad
-                data.forEach(n => {
-                    const item = document.createElement('div');
-                    item.className = `notif-item ${n.leida == 0 ? 'unread' : ''}`;
-                    item.innerHTML = `
-                <div class="notif-content">
-                    <span class="notif-type">${n.tipo}</span>
-                    <p class="notif-msg">${n.mensaje}</p>
-                    <span class="notif-date">${n.created_at}</span>
+                listaUI.innerHTML = data.map(n => {
+                    const tipo = n.tipo || 'Sistema';
+                    const icono = iconos[tipo] || '📌';
+                    const asunto = n.asunto || 'Sin asunto';
+                    const mensaje = n.mensaje || '';
+                    const leida = n.leida == 1;
+
+                    // Formatear fecha legible
+                    const fecha = new Date(n.created_at);
+                    const ahora = new Date();
+                    const diffMs = ahora - fecha;
+                    const diffMin = Math.floor(diffMs / 60000);
+                    let fechaStr;
+                    if (diffMin < 1) fechaStr = 'Ahora mismo';
+                    else if (diffMin < 60) fechaStr = `Hace ${diffMin} min`;
+                    else if (diffMin < 1440) fechaStr = `Hace ${Math.floor(diffMin / 60)} h`;
+                    else fechaStr = fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+
+                    return `
+            <div class="notif-card ${leida ? '' : 'unread'}" data-id="${n.id}">
+                <div class="notif-icon ${tipo}">${icono}</div>
+                <div class="notif-body-inner">
+                    <div class="notif-header">
+                        <span class="notif-asunto">${asunto}</span>
+                        <span class="notif-badge ${tipo}">${tipo}</span>
+                    </div>
+                    <p class="notif-msg-text">${mensaje}</p>
+                    <span class="notif-fecha">${fechaStr}</span>
                 </div>
-            `;
-                    listaUI.appendChild(item);
-                });
+                ${!leida ? '<div class="notif-unread-dot"></div>' : ''}
+            </div>`;
+                }).join('');
 
             } catch (error) {
-                console.error("Error cargando notificaciones:", error);
+                console.error('Error cargando notificaciones:', error);
+                listaUI.innerHTML = '<p style="color:var(--danger);padding:20px 16px;font-size:13px">Error al cargar notificaciones.</p>';
             }
-            async function markAllRead() {
-                const items = document.querySelectorAll('#notif-list .notif-dot:not(.read)');
-                items.forEach(dot => dot.classList.add('read'));
-                // Opcional: llamar un endpoint para marcar en BD
-            }
+        }
+
+        function markAllRead() {
+            document.querySelectorAll('.notif-card.unread').forEach(c => c.classList.remove('unread'));
+            document.querySelectorAll('.notif-unread-dot').forEach(d => d.remove());
+            // Actualizar badge del sidebar
+            const badge = document.getElementById('notif-badge');
+            if (badge) badge.remove();
         }
 
         /* ══════════════════════════════════
