@@ -1,20 +1,20 @@
 <?php
 // api/v1/admin/usuarios.php
 
-// 1. Incluir la conexión (ajusta la ruta según tu config.php)
+// 1. Incluir la conexión 
+// (Asegúrate de que la ruta sea correcta. Si usuarios.php está en api/v1/admin/, 
+// subir 3 niveles con ../../../ es correcto para llegar a la raíz)
 require_once '../../../config/config.php';
 
-// 2. Indicar que la respuesta será JSON
-header('Content-Type: application/json');
+// No definimos PAGINA_HTML porque este archivo SI debe ser JSON.
+// El header ya lo manda tu config.php modificado.
 
 try {
-    // 3. Consulta SQL con JOIN para traer el nombre del rol
-    // Usamos u.* para los datos del usuario y r.nombre_rol para el texto del rol
     $query = "SELECT 
                 u.id, 
                 u.nombre, 
                 u.apellido, 
-                u.usuario, 
+                u.nickname, 
                 u.correo, 
                 u.rol_id,
                 r.nombre_rol as rol
@@ -25,24 +25,30 @@ try {
     $result = $conn->query($query);
 
     if (!$result) {
-        throw new Exception("Error en la consulta: " . $conn->error);
+        // Si falla por 'nickname', intentamos con 'usuario' por si acaso
+        $query = str_replace('u.nickname', 'u.usuario', $query);
+        $result = $conn->query($query);
+        
+        if (!$result) {
+            throw new Exception("Error en la consulta: " . $conn->error);
+        }
     }
 
     $usuarios = [];
 
-    // 4. Recorrer los resultados y guardarlos en un array
+    // 4. Recorrer los resultados
     while ($row = $result->fetch_assoc()) {
         $usuarios[] = $row;
     }
 
-    // 5. Enviar el JSON al navegador
+    // 5. Enviar respuesta usando tu función 'respuesta' de config.php para mantener el formato
+    // O directamente el json_encode si tu frontend espera el array limpio:
     echo json_encode($usuarios);
 
 } catch (Exception $e) {
-    // En caso de error, enviar mensaje claro
     http_response_code(500);
     echo json_encode([
-        "error" => true,
-        "message" => $e->getMessage()
+        "ok" => false,
+        "mensaje" => "Error al obtener usuarios: " . $e->getMessage()
     ]);
 }
