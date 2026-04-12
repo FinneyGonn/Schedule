@@ -1,5 +1,12 @@
 <?php
 session_start();
+
+// Solo mandamos headers de API si NO es una página HTML
+if (!defined('PAGINA_HTML')) {
+    header("Content-Type: application/json");
+    header("Access-Control-Allow-Origin: *");
+}
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 

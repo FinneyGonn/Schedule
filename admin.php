@@ -1,14 +1,13 @@
 <?php
-session_start();
-require_once 'config/config.php';
+define('PAGINA_HTML', true); // Esto le dice a config.php que no mande JSON
+require_once 'config/config.php'; // Aquí ya se inicia la sesión
 
-// Verificar si el usuario está logueado y es admin (rol_id = 1 según tu tabla)
-if (!isset($_SESSION['usuario_id']) || $_SESSION['rol_id'] != 1) {
-    header('Location: login.php');
-    exit;
+// Verificamos la clave CORRECTA que guarda el login
+if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
+    header('Location: index.html'); // Redirige a la raíz, no a login.php
+    exit();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 
