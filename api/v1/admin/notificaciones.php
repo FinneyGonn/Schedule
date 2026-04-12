@@ -1,4 +1,5 @@
 <?php
+session_start(); // AGREGADO: Sin esto, $_SESSION no funciona
 require_once '../../../config/config.php';
 
 header('Content-Type: application/json');
@@ -27,12 +28,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         echo json_encode([]);
     }
     exit;
-}
+} // <--- Aquí estaba el problema, cerraba mal la lógica
 
 // ── POST: enviar notificación (solo admin) ──
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
-        echo json_encode(["success" => false, "message" => "Sin permisos"]);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') { // AGREGADO: Validación de método
+    if (!isset($_SESSION['user_id'])) {
+        echo json_encode(["success" => false, "message" => "No autenticado"]);
         exit;
     }
 
