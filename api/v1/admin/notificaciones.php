@@ -42,3 +42,8 @@ try {
 } catch (Exception $e) {
     echo json_encode(["success" => false, "message" => $e->getMessage()]);
 }
+
+$notificaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Forzamos que siempre sea un array para que el JS no se rompa
+echo json_encode($notificaciones ? $notificaciones : []);

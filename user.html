@@ -1411,35 +1411,44 @@
            NOTIFICACIONES (DATOS REALES)
         ══════════════════════════════════ */
         async function cargarNotificaciones() {
-            const lista = document.getElementById('notif-lista-real') || document.getElementById('panel-notificaciones');
-            if (!lista) return;
-
-            lista.innerHTML = '<p style="padding:20px;">Cargando mensajes del servidor...</p>';
-
             try {
-                // Apuntando a tu nueva carpeta en la raiz
-                const resp = await fetch('api/v1/admin/notificaciones.php');
-                const data = await resp.json();
+                const response = await fetch('user/notificaciones.php');
+                const data = await response.json();
 
-                if (data.length === 0) {
-                    lista.innerHTML = '<div style="padding:40px; text-align:center; opacity:0.5;">No tienes notificaciones todavía.</div>';
+                const listaUI = document.getElementById('notif-list');
+                if (!listaUI) return;
+
+                // Limpiamos la lista
+                listaUI.innerHTML = '';
+
+                // VALIDACIÓN CLAVE: Si data no es un array, es que hubo un error o está vacío
+                if (!Array.isArray(data)) {
+                    console.error("El servidor no envió una lista:", data);
+                    listaUI.innerHTML = `<p style="padding:20px; color:var(--muted)">No se pudieron cargar las notificaciones.</p>`;
                     return;
                 }
 
-                // Usamos mensaje, leida y created_at de tu tabla
-                lista.innerHTML = data.map(n => `
-            <div class="notif-item ${n.leida == 0 ? 'unread' : ''}" style="border-bottom: 1px solid var(--border); padding: 15px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <strong style="color: var(--accent);">${n.tipo || 'Sistema'}</strong>
-                    <small style="opacity: 0.6;">${new Date(n.created_at).toLocaleDateString()}</small>
-                </div>
-                <p style="margin: 0; font-size: 0.95em; line-height: 1.4;">${n.mensaje}</p>
-            </div>
-        `).join('');
+                if (data.length === 0) {
+                    listaUI.innerHTML = `<p style="padding:20px; color:var(--muted)">No tienes notificaciones nuevas.</p>`;
+                    return;
+                }
 
-            } catch (err) {
-                lista.innerHTML = '<p style="padding:20px; color: #ff6b6b;">Error al conectar con el servidor de notificaciones.</p>';
-                console.error("Error cargando notificaciones:", err);
+                // Ahora sí podemos usar .map o .forEach con seguridad
+                data.forEach(n => {
+                    const item = document.createElement('div');
+                    item.className = `notif-item ${n.leida == 0 ? 'unread' : ''}`;
+                    item.innerHTML = `
+                <div class="notif-content">
+                    <span class="notif-type">${n.tipo}</span>
+                    <p class="notif-msg">${n.mensaje}</p>
+                    <span class="notif-date">${n.created_at}</span>
+                </div>
+            `;
+                    listaUI.appendChild(item);
+                });
+
+            } catch (error) {
+                console.error("Error cargando notificaciones:", error);
             }
         }
 
