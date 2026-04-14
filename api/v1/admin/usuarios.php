@@ -1,29 +1,26 @@
 <?php
 // api/v1/admin/usuarios.php
 
-header('Content-Type: application/json');
-
 require_once '../../../config/config.php';
 
-// Verificar que $conn existe antes de usarla
-if (!isset($conn) || $conn->connect_error) {
-    http_response_code(500);
-    echo json_encode([
-        "ok" => false,
-        "mensaje" => "Error de conexión a la base de datos"
-    ]);
-    exit;
-}
-
 try {
+    // Verificar conexión
+    if (!isset($conn) || $conn->connect_error) {
+        throw new Exception("Sin conexión a la base de datos");
+    }
+
+    // Detectar si la columna es 'nickname' o 'usuario'
+    $columnas = $conn->query("SHOW COLUMNS FROM usuarios LIKE 'nickname'");
+    $campoNick = ($columnas && $columnas->num_rows > 0) ? 'u.nickname' : 'u.usuario';
+
     $query = "SELECT 
                 u.id, 
                 u.nombre, 
                 u.apellido, 
-                u.nickname, 
+                $campoNick AS nickname,
                 u.correo, 
                 u.rol_id,
-                r.nombre_rol as rol
+                r.nombre_rol AS rol
               FROM usuarios u
               INNER JOIN roles r ON u.rol_id = r.id
               ORDER BY u.id DESC";
@@ -31,13 +28,7 @@ try {
     $result = $conn->query($query);
 
     if (!$result) {
-        // Si falla por 'nickname', intenta con 'usuario'
-        $query = str_replace('u.nickname', 'u.usuario', $query);
-        $result = $conn->query($query);
-        
-        if (!$result) {
-            throw new Exception("Error en la consulta: " . $conn->error);
-        }
+        throw new Exception("Error en consulta: " . $conn->error);
     }
 
     $usuarios = [];
@@ -45,12 +36,15 @@ try {
         $usuarios[] = $row;
     }
 
-    echo json_encode(["ok" => true, "data" => $usuarios]);
+    echo json_encode([
+        "ok"     => true,
+        "datos"  => $usuarios
+    ]);
 
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
-        "ok" => false,
-        "mensaje" => "Error al obtener usuarios: " . $e->getMessage()
+        "ok"      => false,
+        "mensaje" => $e->getMessage()
     ]);
 }
