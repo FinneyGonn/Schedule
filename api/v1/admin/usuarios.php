@@ -1,5 +1,25 @@
 <?php
-// api/v1/admin/usuarios.php
+// DEBUG TEMPORAL - borrar después
+ob_start();
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+register_shutdown_function(function() {
+    $error = error_get_last();
+    if ($error) {
+        ob_clean();
+        http_response_code(500);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'ok' => false,
+            'debug_error' => $error['message'],
+            'debug_file'  => $error['file'],
+            'debug_line'  => $error['line']
+        ]);
+    } else {
+        ob_end_flush();
+    }
+});
 
 require_once '../../../config/config.php';
 
