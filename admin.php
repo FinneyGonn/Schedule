@@ -1540,13 +1540,324 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
         } catch (e) { console.error('Error actividad:', e); }
     };
 
-    /* INICIALIZACIÓN */
     document.addEventListener('DOMContentLoaded', () => {
         // Ejecutar todas las cargas asíncronas
         cargarEstadisticas();
         cargarActividad();
         cargarUsuarios(); // Carga la lista de usuarios real
+        cargarSolicitudes();
     });
+
+    async function cargarSolicitudes() {
+        try {
+            const resp = await fetch('api/v1/admin/actividad.php');
+            if (!resp.ok) return;
+            const data = await resp.json();
+
+            const badge = document.getElementById('sol-badge');
+            const tbody = document.getElementById('sol-tbody');
+            const pending = data.filter(d => d.estado === 'pendiente');
+
+            if (badge) badge.textContent = pending.length;
+
+            if (!data || data.length === 0) return;
+
+            tbody.innerHTML = data.map(s => `
+                <tr>
+                    <td>${s.nombre}</td>
+                    <td>—</td>
+                    <td>${s.nombre_rol}</td>
+                    <td>${s.created_at}</td>
+                    <td><span class="badge ${s.estado === 'pendiente' ? 'badge-pend' : 'badge-act'}">${s.estado}</span></td>
+                    <td>
+                        <div class="actions-cell">
+                            <button class="btn btn-s btn-sm">Aprobar</button>
+                            <button class="btn btn-d btn-sm">Rechazar</button>
+                        </div>
+                    </td>
+                </tr>`).join('');
+        } catch(e) { console.error('Error solicitudes:', e); }
+    }
+    /* ── FILTRO DE TABLA ── */
+    function filterTable(tbodyId, inputId) {
+        const q = document.getElementById(inputId).value.toLowerCase();
+        document.querySelectorAll('#' + tbodyId + ' tr').forEach(tr => {
+            tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+    }
+
+    /* ── COLOR ── */
+    function selectColor(el) {
+        document.querySelectorAll('.cp').forEach(c => c.classList.remove('sel'));
+        el.classList.add('sel');
+        selectedColor = el.dataset.c;
+    }
+
+    /* ── MODAL BLOQUE ── */
+    function abrirModalBloque(fromCell = false) {
+        editingBlock = null;
+        document.getElementById('bloque-modal-title').textContent = 'Agregar bloque';
+        document.getElementById('blk-nombre').value = '';
+        document.getElementById('blk-inicio').value = fromCell && clickedCell ? clickedCell.hora : '07:00';
+        document.getElementById('blk-fin').value = '09:00';
+        if (fromCell && clickedCell) {
+            document.getElementById('blk-dia').value = clickedCell.dia;
+        }
+        // Poblar select de salones
+        const selSalon = document.getElementById('blk-salon');
+        selSalon.innerHTML = salonesData.length
+            ? salonesData.map(s => `<option value="${s.nombre}">${s.nombre} (cap. ${s.capacidad})</option>`).join('')
+            : '<option value="">— Sin salones —</option>';
+        // Poblar select de profesores desde los usuarios cargados
+        poblarProfesoresEnModal('blk-prof');
+        openModal('modal-bloque');
+    }
+
+    function editBlock(idx) {
+        const b = (schedData[currentGrupo()] || [])[idx];
+        if (!b) return;
+        editingBlock = idx;
+        document.getElementById('bloque-modal-title').textContent = 'Editar bloque';
+        document.getElementById('blk-nombre').value  = b.nombre;
+        document.getElementById('blk-dia').value     = b.dia;
+        document.getElementById('blk-inicio').value  = b.hora_inicio;
+        document.getElementById('blk-fin').value     = b.hora_fin;
+        selectedColor = b.color || 'c0';
+        document.querySelectorAll('.cp').forEach(c => {
+            c.classList.toggle('sel', c.dataset.c === selectedColor);
+        });
+        const selSalon = document.getElementById('blk-salon');
+        selSalon.innerHTML = salonesData.length
+            ? salonesData.map(s => `<option value="${s.nombre}" ${s.nombre === b.salon ? 'selected' : ''}>${s.nombre} (cap. ${s.capacidad})</option>`).join('')
+            : `<option value="${b.salon}">${b.salon}</option>`;
+        poblarProfesoresEnModal('blk-prof', b.profesor);
+        openModal('modal-bloque');
+    }
+
+    function addBlock() {
+        const nombre  = document.getElementById('blk-nombre').value.trim();
+        const dia     = document.getElementById('blk-dia').value;
+        const salon   = document.getElementById('blk-salon').value || 'Sin salón';
+        const inicio  = document.getElementById('blk-inicio').value;
+        const fin     = document.getElementById('blk-fin').value;
+        const profesor = document.getElementById('blk-prof').value;
+
+        if (!nombre) { alert('Por favor escribe el nombre de la materia.'); return; }
+        if (!inicio || !fin || fin <= inicio) { alert('Las horas son inválidas.'); return; }
+
+        const grp = currentGrupo();
+        if (!schedData[grp]) schedData[grp] = [];
+
+        const bloque = { nombre, dia, salon, hora_inicio: inicio, hora_fin: fin, profesor, color: selectedColor };
+
+        if (editingBlock !== null) {
+            schedData[grp][editingBlock] = bloque;
+        } else {
+            schedData[grp].push(bloque);
+        }
+
+        closeModal('modal-bloque');
+        renderSched();
+    }
+
+    function deleteBlock(e, idx) {
+        e.stopPropagation();
+        const grp = currentGrupo();
+        if (!schedData[grp]) return;
+        schedData[grp].splice(idx, 1);
+        renderSched();
+    }
+
+    function clearSched() {
+        if (!confirm('¿Limpiar todo el horario de este grupo?')) return;
+        schedData[currentGrupo()] = [];
+        renderSched();
+    }
+
+    /* ── USUARIOS ── */
+    function saveUsuario() {
+        const nombre   = document.getElementById('usr-nombre').value.trim();
+        const apellido = document.getElementById('usr-apellido').value.trim();
+        const nick     = document.getElementById('usr-nick').value.trim();
+        const correo   = document.getElementById('usr-correo').value.trim();
+        const rol      = document.getElementById('usr-rol').value;
+        const pass     = document.getElementById('usr-pass').value;
+
+        if (!nombre || !correo || !pass) { alert('Nombre, correo y contraseña son obligatorios.'); return; }
+
+        fetch('api/v1/admin/usuarios.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nombre, apellido, nickname: nick, correo, rol_id: rol, password: pass })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.ok !== false) {
+                closeModal('modal-usuario');
+                cargarUsuarios();
+            } else {
+                alert(data.mensaje || 'Error al guardar el usuario.');
+            }
+        })
+        .catch(() => alert('Error de conexión al guardar usuario.'));
+    }
+
+    function editUser(id) {
+        alert('Función de edición próximamente (ID: ' + id + ')');
+    }
+
+    /* ── GRUPOS ── */
+    function saveGrupo() {
+        const nombre = document.getElementById('grp-nombre').value.trim();
+        const desc   = document.getElementById('grp-desc').value.trim();
+        const profId = document.getElementById('grp-prof').value;
+        const profNombre = document.getElementById('grp-prof').options[document.getElementById('grp-prof').selectedIndex]?.text || '';
+
+        if (!nombre) { alert('El nombre del grupo es obligatorio.'); return; }
+
+        const id = Date.now();
+        grupos.push({ id, nombre, desc, profId, profNombre });
+
+        const tbody = document.getElementById('grp-tbody');
+        const emptyRow = document.getElementById('grp-empty-row');
+        if (emptyRow) emptyRow.remove();
+
+        const tr = document.createElement('tr');
+        tr.dataset.gid = id;
+        tr.innerHTML = `
+            <td><strong>${nombre}</strong></td>
+            <td>${desc || '—'}</td>
+            <td>0</td>
+            <td>${profNombre !== 'Sin asignar' && profNombre !== '' ? profNombre : '—'}</td>
+            <td>
+                <div class="actions-cell">
+                    <button class="btn btn-o btn-sm" onclick="go('horario', document.querySelectorAll('.ni')[1])">Ver horario</button>
+                    <button class="btn btn-d btn-sm" onclick="eliminarGrupo(${id}, this)">Eliminar</button>
+                </div>
+            </td>`;
+        tbody.appendChild(tr);
+
+        closeModal('modal-grupo');
+        document.getElementById('grp-nombre').value = '';
+        document.getElementById('grp-desc').value = '';
+
+        // Actualizar el select de horarios
+        const sel = document.getElementById('sched-grupo');
+        if (sel) {
+            const opt = document.createElement('option');
+            opt.value = id;
+            opt.textContent = nombre;
+            sel.appendChild(opt);
+        }
+
+        // Actualizar stat card
+        const el = document.getElementById('count-grupos');
+        if (el && el.textContent !== '—') el.textContent = parseInt(el.textContent || 0) + 1;
+    }
+
+    function eliminarGrupo(id, btn) {
+        if (!confirm('¿Eliminar este grupo?')) return;
+        const idx = grupos.findIndex(g => g.id === id);
+        if (idx > -1) grupos.splice(idx, 1);
+        btn.closest('tr').remove();
+        delete schedData[id];
+        if (document.getElementById('grp-tbody').rows.length === 0) {
+            document.getElementById('grp-tbody').innerHTML = '<tr id="grp-empty-row"><td colspan="5" style="text-align:center;color:var(--muted);padding:30px">No hay grupos creados.</td></tr>';
+        }
+    }
+
+    /* ── SALONES ── */
+    function saveSalon() {
+        const nombre = document.getElementById('sal-nombre').value.trim();
+        const cap    = parseInt(document.getElementById('sal-cap').value) || 0;
+
+        if (!nombre) { alert('El nombre del salón es obligatorio.'); return; }
+
+        salonesData.push({ nombre, capacidad: cap });
+
+        // Tabla
+        const tbody = document.getElementById('sal-tbody');
+        if (tbody.querySelector('td[colspan]')) tbody.innerHTML = '';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${nombre}</td>
+            <td>${cap}</td>
+            <td><span class="badge badge-act">Disponible</span></td>
+            <td>
+                <div class="actions-cell">
+                    <button class="btn btn-d btn-sm" onclick="eliminarSalon('${nombre}', this)">Eliminar</button>
+                </div>
+            </td>`;
+        tbody.appendChild(tr);
+
+        // Tarjeta disponibilidad
+        const grid = document.getElementById('avail-grid');
+        if (grid.querySelector('p')) grid.innerHTML = '';
+        const card = document.createElement('div');
+        card.className = 'avail-card';
+        card.dataset.salon = nombre;
+        card.innerHTML = `
+            <h4>${nombre}</h4>
+            <div class="cap">Capacidad: ${cap}</div>
+            <div class="avail-bar-wrap"><div class="avail-bar" style="width:0%"></div></div>`;
+        grid.appendChild(card);
+
+        closeModal('modal-salon');
+        document.getElementById('sal-nombre').value = '';
+        document.getElementById('sal-cap').value = '';
+
+        const el = document.getElementById('count-salones');
+        if (el && el.textContent !== '—') el.textContent = parseInt(el.textContent || 0) + 1;
+    }
+
+    function eliminarSalon(nombre, btn) {
+        if (!confirm('¿Eliminar el salón "' + nombre + '"?')) return;
+        const idx = salonesData.findIndex(s => s.nombre === nombre);
+        if (idx > -1) salonesData.splice(idx, 1);
+        btn.closest('tr').remove();
+        const card = document.querySelector(`.avail-card[data-salon="${nombre}"]`);
+        if (card) card.remove();
+        if (document.getElementById('sal-tbody').rows.length === 0) {
+            document.getElementById('sal-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:30px">No hay salones registrados aún.</td></tr>';
+        }
+    }
+
+    /* ── NOTIFICACIONES ── */
+    function markAllRead() {
+        document.querySelectorAll('.notif-dot').forEach(d => d.classList.add('read'));
+        const badge = document.getElementById('notif-badge');
+        if (badge) badge.textContent = '0';
+    }
+
+    /* ── UTILIDADES ── */
+    function poblarProfesoresEnModal(selectId, selected = '') {
+        const sel = document.getElementById(selectId);
+        // Obtener profesores desde la tabla de usuarios
+        const rows = document.querySelectorAll('#usr-tbody tr');
+        const profs = [];
+        rows.forEach(tr => {
+            const badgeEl = tr.querySelector('.badge-prof');
+            if (badgeEl) {
+                const name = tr.cells[0]?.textContent?.trim();
+                if (name) profs.push(name);
+            }
+        });
+        sel.innerHTML = '<option value="Sin asignar">Sin asignar</option>' +
+            profs.map(p => `<option value="${p}" ${p === selected ? 'selected' : ''}>${p}</option>`).join('');
+    }
+
+    /* Poblar selector de profesores en modal de Grupo */
+    function poblarProfesoresGrupo() {
+        poblarProfesoresEnModal('grp-prof');
+    }
+
+    // Extender openModal para poblar selects dinámicamente
+    const _openModal = openModal;
+    openModal = function(id) {
+        if (id === 'modal-grupo') poblarProfesoresGrupo();
+        _openModal(id);
+    };
+
     async function enviarNotificacionGlobal() {
     const asunto  = document.getElementById('notif-asunto').value.trim();
     const tipo    = document.getElementById('notif-tipo-global').value;
