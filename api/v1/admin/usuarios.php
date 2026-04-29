@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: application/json; charset=utf-8');
 // DEBUG TEMPORAL - borrar después
 ob_start();
 ini_set('display_errors', 1);
@@ -56,10 +57,9 @@ try {
         $usuarios[] = $row;
     }
 
-    echo json_encode([
-        "ok"     => true,
-        "datos"  => $usuarios
-    ]);
+    // El JS en admin.php espera un array directo (data.map(...))
+    header('Content-Type: application/json');
+    echo json_encode($usuarios);
 
 } catch (Exception $e) {
     http_response_code(500);
