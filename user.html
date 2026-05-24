@@ -1600,7 +1600,7 @@
             const rol_id = parseInt(rolSelect.value);
 
             if (!rol_id) {
-                alert('Por favor selecciona un rol (Profesor o Administrador).');
+                alert('Por favor selecciona un rol.');
                 return;
             }
 
@@ -1609,32 +1609,31 @@
             try {
                 const response = await fetch('api/v1/admin/solicitudes/crear.php', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        rol_id: rol_id,
-                        motivo: motivo
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rol_id: rol_id, motivo: motivo })
                 });
 
-                if (!response.ok) {
-                    throw new Error('Error HTTP: ' + response.status);
+                const text = await response.text(); // Para debug
+
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error("Respuesta del servidor:", text);
+                    throw new Error("El servidor no devolvió JSON válido");
                 }
 
-                const data = await response.json();
-
-                if (data.success || data.ok) {
-                    alert('✅ Solicitud enviada correctamente. El administrador la revisará.');
+                if (data.success) {
+                    alert('✅ Solicitud enviada correctamente.');
                     closeModal('modal-rol');
-                    document.getElementById('rol-motivo').value = ''; // limpiar motivo
+                    document.getElementById('rol-motivo').value = '';
                 } else {
-                    alert('❌ ' + (data.message || data.mensaje || 'No se pudo enviar la solicitud'));
+                    alert('❌ ' + (data.message || 'Error desconocido'));
                 }
 
             } catch (error) {
                 console.error('Error completo:', error);
-                alert('Error de conexión con el servidor. Revisa la consola (F12) para más detalles.');
+                alert('Error de conexión. Revisa la consola (F12) para más detalles.');
             }
         }
 

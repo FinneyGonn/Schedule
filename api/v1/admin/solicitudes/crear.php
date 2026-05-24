@@ -20,7 +20,7 @@ if (!in_array($rol_solicitado, [1, 2])) {
 }
 
 try {
-    // Verificar si ya existe una solicitud pendiente
+    // Verificar solicitud pendiente
     $check = $conn->prepare("SELECT id FROM solicitudes_rol WHERE usuario_id = ? AND estado = 'pendiente'");
     $check->bind_param("i", $usuario_id);
     $check->execute();
@@ -30,7 +30,7 @@ try {
         exit;
     }
 
-    // Insertar solicitud
+    // Insertar la solicitud
     $stmt = $conn->prepare("INSERT INTO solicitudes_rol 
         (usuario_id, rol_solicitado_id, motivo_solicitud, estado, created_at) 
         VALUES (?, ?, ?, 'pendiente', NOW())");
@@ -44,7 +44,7 @@ try {
     }
 
 } catch (Exception $e) {
-    error_log("Error en crear solicitud: " . $e->getMessage());
+    error_log("Error crear solicitud: " . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
 }
 ?>
