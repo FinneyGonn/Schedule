@@ -10,7 +10,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Verificar sesión del usuario (cualquier rol puede pedir cambio)
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'No has iniciado sesión.']);
@@ -28,14 +27,12 @@ $rol_id  = (int)($data['rol_id'] ?? 0);
 $motivo  = trim($data['motivo'] ?? '');
 $user_id = (int)$_SESSION['user_id'];
 
-// Solo se puede solicitar Profesor (2) o Administrador (1)
 if (!in_array($rol_id, [1, 2])) {
     http_response_code(422);
     echo json_encode(['success' => false, 'message' => 'Rol solicitado inválido.']);
     exit;
 }
 
-// No puede solicitar el mismo rol que ya tiene
 if ((int)$_SESSION['rol_id'] === $rol_id) {
     http_response_code(422);
     echo json_encode(['success' => false, 'message' => 'Ya tienes ese rol asignado.']);
@@ -43,7 +40,7 @@ if ((int)$_SESSION['rol_id'] === $rol_id) {
 }
 
 try {
-    // Verificar si ya tiene una solicitud pendiente
+    // Verificar solicitud pendiente
     $check = $conn->prepare(
         "SELECT id FROM solicitudes_rol WHERE usuario_id = ? AND estado = 'pendiente' LIMIT 1"
     );
@@ -55,37 +52,42 @@ try {
         exit;
     }
 
-    // Insertar la solicitud con prepared statement
+    // Insertar solicitud
     $stmt = $conn->prepare(
         "INSERT INTO solicitudes_rol (usuario_id, rol_solicitado_id, motivo_solicitud, estado)
- VALUES (?, ?, ?, 'pendiente')"
+         VALUES (?, ?, ?, 'pendiente')"
     );
     $stmt->bind_param('iis', $user_id, $rol_id, $motivo);
 
-    if ($stmt->execute()) {
-        // Notificar a todos los admins
-        $admins = $conn->query("SELECT id FROM usuarios WHERE rol_id = 1");
-        if ($admins && $admins->num_rows > 0) {
-            $notif = $conn->prepare(
-                "INSERT INTO notificaciones (usuario_id, asunto, mensaje, tipo, leida, created_at)
-                 VALUES (?, 'Nueva solicitud de cambio de rol', ?, 'Sistema', 0, NOW())"
-            );
-            // Obtener nombre del usuario que solicita
-            $uRow = $conn->query("SELECT nombre, apellido FROM usuarios WHERE id = $user_id")->fetch_assoc();
-            $nombreSolicitante = ($uRow['nombre'] ?? '') . ' ' . ($uRow['apellido'] ?? '');
-            $roles = [1 => 'Administrador', 2 => 'Profesor'];
-            $msgNotif = trim($nombreSolicitante) . " solicitó el rol de " . ($roles[$rol_id] ?? 'desconocido') . ".";
-
-            while ($admin = $admins->fetch_assoc()) {
-                $notif->bind_param('is', $admin['id'], $msgNotif);
-                $notif->execute();
-            }
-        }
-
-        echo json_encode(['success' => true, 'message' => 'Solicitud enviada correctamente.']);
-    } else {
+    if (!$stmt->execute()) {
         throw new Exception($stmt->error);
     }
+
+    // Obtener nombre del solicitante con prepared statement
+    $uStmt = $conn->prepare("SELECT nombre, apellido FROM usuarios WHERE id = ? LIMIT 1");
+    $uStmt->bind_param('i', $user_id);
+    $uStmt->execute();
+    $uRow = $uStmt->get_result()->fetch_assoc();
+    $nombreSolicitante = trim(($uRow['nombre'] ?? '') . ' ' . ($uRow['apellido'] ?? ''));
+
+    $roles    = [1 => 'Administrador', 2 => 'Profesor'];
+    $asunto   = 'Nueva solicitud de cambio de rol';
+    $msgNotif = "$nombreSolicitante solicitó el rol de " . ($roles[$rol_id] ?? 'desconocido') . ".";
+
+    // Notificar a todos los admins
+    $admins = $conn->query("SELECT id FROM usuarios WHERE rol_id = 1");
+    if ($admins && $admins->num_rows > 0) {
+        $notif = $conn->prepare(
+            "INSERT INTO notificaciones (usuario_id, asunto, mensaje, tipo, leida, created_at)
+             VALUES (?, ?, ?, 'Sistema', 0, NOW())"
+        );
+        while ($admin = $admins->fetch_assoc()) {
+            $notif->bind_param('iss', $admin['id'], $asunto, $msgNotif);
+            $notif->execute();
+        }
+    }
+
+    echo json_encode(['success' => true, 'message' => 'Solicitud enviada correctamente.']);
 
 } catch (Exception $e) {
     http_response_code(500);
