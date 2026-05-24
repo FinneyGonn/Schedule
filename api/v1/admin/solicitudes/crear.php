@@ -1,5 +1,7 @@
 <?php
 session_start();
+
+// Ruta corregida (subimos 3 niveles desde api/v1/admin/solicitudes/)
 require_once '../../../config/config.php';
 
 header('Content-Type: application/json');
@@ -28,8 +30,10 @@ try {
         exit;
     }
 
-    $stmt = $conn->prepare("INSERT INTO solicitudes_rol (usuario_id, rol_solicitado_id, motivo_solicitud, estado, created_at) 
-                            VALUES (?, ?, ?, 'pendiente', NOW())");
+    $stmt = $conn->prepare("INSERT INTO solicitudes_rol 
+        (usuario_id, rol_solicitado_id, motivo_solicitud, estado, created_at) 
+        VALUES (?, ?, ?, 'pendiente', NOW())");
+    
     $stmt->bind_param("iis", $_SESSION['user_id'], $rol_id, $motivo);
 
     if ($stmt->execute()) {
@@ -39,6 +43,7 @@ try {
     }
 
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Error del servidor']);
+    error_log("Error en crear solicitud: " . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
 }
 ?>
