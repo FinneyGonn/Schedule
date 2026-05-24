@@ -426,7 +426,7 @@ $csrf_token = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
         </div>
     </div>
 
-    <script src="assets/js/admin.js"></script>
+    <script src="assets2/js/admin.js"></script>
 </body>
 
 </html>
