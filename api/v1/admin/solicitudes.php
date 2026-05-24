@@ -46,6 +46,7 @@ try {
     http_response_code(500);
     echo json_encode(['ok' => false, 'mensaje' => $e->getMessage()]);
 }
+
 // ════════════════════════════════════════════════════════════
 //  GET — Listar todas las solicitudes
 // ════════════════════════════════════════════════════════════
@@ -60,14 +61,14 @@ function listarSolicitudes(mysqli $conn): void
                 rs.nombre  AS nombre_rol,
                 s.estado,
                 s.motivo_respuesta,
-                DATE_FORMAT(s.fecha_solicitud, '%d/%m/%Y %H:%i') AS created_at
+                DATE_FORMAT(s.created_at, '%d/%m/%Y %H:%i') AS created_at
             FROM solicitudes_rol s
-            JOIN usuarios u  ON s.usuario_id      = u.id
-            JOIN roles    ra ON u.rol_id           = ra.id
+            JOIN usuarios u  ON s.usuario_id       = u.id
+            JOIN roles    ra ON u.rol_id            = ra.id
             JOIN roles    rs ON s.rol_solicitado_id = rs.id
             ORDER BY
                 FIELD(s.estado, 'pendiente', 'aprobado', 'rechazado'),
-                s.fecha_solicitud DESC
+                s.created_at DESC
             LIMIT 50";
 
     $result = $conn->query($sql);
@@ -91,7 +92,6 @@ function responderSolicitud(mysqli $conn): void
     $decision = trim($body['decision'] ?? '');
     $motivo   = trim($body['motivo'] ?? '');
 
-    // Validar parámetros
     if (!$id) {
         http_response_code(422);
         echo json_encode(['ok' => false, 'mensaje' => 'ID de solicitud inválido.']);
@@ -104,10 +104,9 @@ function responderSolicitud(mysqli $conn): void
         return;
     }
 
-    // Traer la solicitud
     $stmt = $conn->prepare(
-        "SELECT s.id, s.usuario_id, s.rol_solicitado_id, s.estado 
-         FROM solicitudes_rol s 
+        "SELECT s.id, s.usuario_id, s.rol_solicitado_id, s.estado
+         FROM solicitudes_rol s
          WHERE s.id = ? LIMIT 1"
     );
     $stmt->bind_param('i', $id);
@@ -126,33 +125,29 @@ function responderSolicitud(mysqli $conn): void
         return;
     }
 
-    // Iniciar transacción
     $conn->begin_transaction();
 
     try {
-        // Actualizar estado y motivo
         $upd = $conn->prepare(
-            "UPDATE solicitudes_rol 
-             SET estado = ?, 
+            "UPDATE solicitudes_rol
+             SET estado = ?,
                  motivo_respuesta = ?,
-                 fecha_respuesta = NOW() 
+                 fecha_respuesta = NOW()
              WHERE id = ?"
         );
         $upd->bind_param('ssi', $decision, $motivo, $id);
         $upd->execute();
 
         if ($decision === 'aprobado') {
-            // Cambiar rol del usuario
             $updRol = $conn->prepare(
                 "UPDATE usuarios SET rol_id = ? WHERE id = ?"
             );
             $updRol->bind_param('ii', $solicitud['rol_solicitado_id'], $solicitud['usuario_id']);
             $updRol->execute();
 
-            // Rechazar otras solicitudes pendientes del mismo usuario
             $cancelar = $conn->prepare(
-                "UPDATE solicitudes_rol 
-                 SET estado = 'rechazado' 
+                "UPDATE solicitudes_rol
+                 SET estado = 'rechazado'
                  WHERE usuario_id = ? AND estado = 'pendiente' AND id != ?"
             );
             $cancelar->bind_param('ii', $solicitud['usuario_id'], $id);
@@ -169,9 +164,8 @@ function responderSolicitud(mysqli $conn): void
 
     } catch (Exception $e) {
         $conn->rollback();
-        error_log('[solicitudes.php] Error: ' . $e->getMessage());
         http_response_code(500);
-        echo json_encode(['ok' => false, 'mensaje' => 'Error al procesar la solicitud.']);
+        echo json_encode(['ok' => false, 'mensaje' => $e->getMessage()]);
     }
 }
 
@@ -183,4 +177,3 @@ function respuesta405(): void
     http_response_code(405);
     echo json_encode(['ok' => false, 'mensaje' => 'Método no permitido.']);
 }
-?>
