@@ -98,6 +98,7 @@ function go(name, activeBtn = null) {
         const b = document.getElementById('notif-badge');
         if (b) b.textContent = '0';
     }
+    if (name === 'solicitudes') cargarSolicitudes();
     if (name === 'horario') renderSchedPanel();
 }
 
