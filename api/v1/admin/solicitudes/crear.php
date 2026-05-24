@@ -57,8 +57,8 @@ try {
 
     // Insertar la solicitud con prepared statement
     $stmt = $conn->prepare(
-        "INSERT INTO solicitudes_rol (usuario_id, rol_solicitado_id, motivo_solicitud, estado, fecha_solicitud)
-         VALUES (?, ?, ?, 'pendiente', NOW())"
+        "INSERT INTO solicitudes_rol (usuario_id, rol_solicitado_id, motivo_solicitud, estado)
+ VALUES (?, ?, ?, 'pendiente')"
     );
     $stmt->bind_param('iis', $user_id, $rol_id, $motivo);
 
