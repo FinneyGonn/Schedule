@@ -254,7 +254,7 @@ async function desactivarUsuario(id, btn) {
    ══════════════════════════════════════════════════════════════ */
 async function cargarSolicitudes() {
     try {
-        const data = await apiFetch('api/v1/admin/actividad.php');
+        const data = await apiFetch('api/v1/admin/solicitudes.php');
         const badge = document.getElementById('sol-badge');
         const tbody = document.getElementById('sol-tbody');
         const pending = data.filter(d => d.estado === 'pendiente');
