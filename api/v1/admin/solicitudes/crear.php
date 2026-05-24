@@ -88,7 +88,6 @@ try {
     }
 
 } catch (Exception $e) {
-    error_log('[crear.php] ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Error interno del servidor.']);
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
