@@ -463,6 +463,11 @@ tbody tr:hover {
     color: #a08cdc
 }
 
+.badge-rej {
+    background: rgba(220, 80, 80, .15);
+    color: #e05555;
+}
+
 /* SCHEDULE */
 .sched-toolbar {
     display: flex;
