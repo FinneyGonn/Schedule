@@ -1,14 +1,7 @@
 <?php
-// ============================================================
-//  api/v1/admin/solicitudes/crear.php
-//  Método: POST — El usuario envía solicitud de cambio de rol
-//  Llamado desde: user.html
-// ============================================================
+header('Content-Type: application/json; charset=utf-8');
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-header('Content-Type: application/json; charset=utf-8');
-
-// config.php ya llama session_start() internamente
 require_once '../../../../config/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
