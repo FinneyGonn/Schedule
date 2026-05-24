@@ -1,34 +1,43 @@
 <?php
 session_start();
-require_once '../../../config/config.php';
+require_once '../../config/config.php';
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'Sesión no iniciada']);
     exit;
 }
 
 $data = json_decode(file_get_contents("php://input"), true);
-$usuario_id = $_SESSION['usuario_id'];
-$rol_solicitado = $data['rol_id'];
+$usuario_id = $_SESSION['user_id'];
+$rol_solicitado = (int)($data['rol_id'] ?? 0);
+
+if (!in_array($rol_solicitado, [1, 2])) { // 1=Admin, 2=Profesor
+    echo json_encode(['success' => false, 'message' => 'Rol solicitado inválido']);
+    exit;
+}
 
 try {
-    // Verificamos si ya existe una pendiente
-    $check = $conn->query("SELECT id FROM solicitudes_rol WHERE usuario_id = $usuario_id AND estado = 'pendiente'");
-    if ($check->num_rows > 0) {
+    // Verificar si ya tiene una solicitud pendiente
+    $check = $conn->prepare("SELECT id FROM solicitudes_rol WHERE usuario_id = ? AND estado = 'pendiente'");
+    $check->bind_param("i", $usuario_id);
+    $check->execute();
+    if ($check->get_result()->num_rows > 0) {
         echo json_encode(['success' => false, 'message' => 'Ya tienes una solicitud pendiente.']);
         exit;
     }
 
-    // Usamos created_at y NOW() para que MySQL ponga la hora actual
-    $sql = "INSERT INTO solicitudes_rol (usuario_id, rol_solicitado_id, created_at, estado) 
-            VALUES ($usuario_id, $rol_solicitado, NOW(), 'pendiente')";
-    
-    if ($conn->query($sql)) {
+    $stmt = $conn->prepare("INSERT INTO solicitudes_rol (usuario_id, rol_solicitado_id, estado, created_at) 
+                            VALUES (?, ?, 'pendiente', NOW())");
+    $stmt->bind_param("ii", $usuario_id, $rol_solicitado);
+
+    if ($stmt->execute()) {
         echo json_encode(['success' => true, 'message' => 'Solicitud enviada correctamente']);
     } else {
-        throw new Exception($conn->error);
+        echo json_encode(['success' => false, 'message' => 'Error al guardar solicitud']);
     }
+
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Error del servidor']);
 }
+?>

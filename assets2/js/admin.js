@@ -785,3 +785,71 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarSalones();    // reemplaza el array local de salones
     cargarSolicitudes();
 });
+
+// SOLICITUDES, APROBAR, RECHAZAR Y DAR MOTIVOS
+
+// ===================== RESPONDER SOLICITUDES CON MOTIVO =====================
+let solicitudActualId = null;
+
+function responderSolicitud(id, decision) {
+    solicitudActualId = id;
+
+    const titulo = document.getElementById('modal-responder-titulo');
+    const sub = document.getElementById('modal-responder-sub');
+    const btnAprobar = document.getElementById('btn-aprobar-final');
+    const btnRechazar = document.getElementById('btn-rechazar-final');
+
+    // Obtener nombre del usuario desde la tabla
+    const fila = document.querySelector(`#sol-tbody tr[data-id="${id}"]`);
+    const nombreUsuario = fila ? fila.cells[0].textContent.trim() : 'Usuario';
+
+    sub.innerHTML = `Usuario: <strong>${esc(nombreUsuario)}</strong>`;
+
+    if (decision === 'aprobado') {
+        titulo.textContent = "Aprobar Solicitud";
+        btnAprobar.style.display = 'inline-flex';
+        btnRechazar.style.display = 'none';
+    } else {
+        titulo.textContent = "Rechazar Solicitud";
+        btnAprobar.style.display = 'none';
+        btnRechazar.style.display = 'inline-flex';
+    }
+
+    document.getElementById('motivo-respuesta').value = '';
+    openModal('modal-responder-solicitud');
+}
+
+async function confirmarRespuesta(decision) {
+    if (!solicitudActualId) return;
+
+    const motivo = document.getElementById('motivo-respuesta').value.trim();
+
+    try {
+        const data = await apiFetch('api/v1/admin/solicitudes.php', {
+            method: 'POST',
+            body: JSON.stringify({
+                id: solicitudActualId,
+                decision: decision,
+                motivo: motivo
+            })
+        });
+
+        if (data.ok) {
+            closeModal('modal-responder-solicitud');
+            alert(decision === 'aprobado'
+                ? '✅ Solicitud aprobada correctamente'
+                : '✅ Solicitud rechazada correctamente');
+
+            cargarSolicitudes();
+            cargarEstadisticas();
+        } else {
+            alert(data.mensaje || 'Error al procesar la solicitud');
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Error de conexión con el servidor');
+    }
+}
+
+// Sobrescribir función para que funcione con los botones de la tabla
+window.responderSolicitud = responderSolicitud;

@@ -224,28 +224,47 @@ $csrf_token = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
             </div>
 
             <!-- SOLICITUDES -->
-            <div class="panel" id="panel-solicitudes">
-                <h2 class="sec-title">Solicitudes de Rol</h2>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Usuario</th>
-                                <th>Rol actual</th>
-                                <th>Rol solicitado</th>
-                                <th>Fecha</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="sol-tbody">
-                            <tr>
-                                <td colspan="6" style="text-align:center;color:var(--muted);padding:30px">No hay solicitudes pendientes.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+<div class="panel" id="panel-solicitudes">
+    <h2 class="sec-title">Solicitudes de Rol</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Rol actual</th>
+                    <th>Rol solicitado</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="sol-tbody">
+                <tr>
+                    <td colspan="6" style="text-align:center;color:var(--muted);padding:30px">No hay solicitudes pendientes.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ===================== MODAL: RESPONDER SOLICITUD ===================== -->
+<div class="overlay" id="modal-responder-solicitud">
+    <div class="modal" style="max-width:520px">
+        <h2 id="modal-responder-titulo">Responder Solicitud</h2>
+        <p class="sub" id="modal-responder-sub">Usuario: <strong id="solicitud-usuario"></strong></p>
+        
+        <div class="field">
+            <label>Motivo <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+            <textarea id="motivo-respuesta" rows="4" placeholder="Explica brevemente el motivo de tu decisión..."></textarea>
+        </div>
+
+        <div class="modal-foot">
+            <button class="btn btn-o" onclick="closeModal('modal-responder-solicitud')">Cancelar</button>
+            <button class="btn btn-s" id="btn-aprobar-final" onclick="confirmarRespuesta('aprobado')">✅ Aprobar</button>
+            <button class="btn btn-d" id="btn-rechazar-final" onclick="confirmarRespuesta('rechazado')">❌ Rechazar</button>
+        </div>
+    </div>
+</div>
 
             <!-- NOTIFICACIONES -->
             <div class="panel" id="panel-notificaciones">
