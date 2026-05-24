@@ -1,11 +1,34 @@
 <?php
-define('PAGINA_HTML', true); 
-require_once 'config/config.php'; 
+define('PAGINA_HTML', true);
+require_once 'config/config.php';
 
+// Verificar sesión y rol de administrador
 if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
     header('Location: index.html');
     exit();
 }
+
+// Generar token CSRF si no existe
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// Datos del admin para mostrar en UI (sanitizados)
+$admin_nombre   = htmlspecialchars($_SESSION['nombre']    ?? 'Administrador', ENT_QUOTES, 'UTF-8');
+$admin_apellido = htmlspecialchars($_SESSION['apellido']  ?? '',               ENT_QUOTES, 'UTF-8');
+$admin_nombre_completo = trim($admin_nombre . ' ' . $admin_apellido);
+
+// Iniciales para el avatar (máx. 2 caracteres)
+$partes    = array_filter(explode(' ', $admin_nombre_completo));
+$iniciales = '';
+foreach ($partes as $p) {
+    $iniciales .= mb_strtoupper(mb_substr($p, 0, 1));
+    if (mb_strlen($iniciales) >= 2) break;
+}
+if (empty($iniciales)) $iniciales = 'AD';
+$iniciales = htmlspecialchars($iniciales, ENT_QUOTES, 'UTF-8');
+
+$csrf_token = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -14,6 +37,10 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Horarios — Admin Dashboard</title>
+
+    <!-- Token CSRF disponible para JS -->
+    <meta name="csrf-token" content="<?= $csrf_token ?>">
+
     <link
         href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
         rel="stylesheet" />
@@ -30,23 +57,21 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
         </div>
         <nav class="sb-nav">
             <span class="sb-label">General</span>
-            <button class="ni active" onclick="go('home',this)"><span class="ni-ic">▦</span> Resumen</button>
-            <button class="ni" onclick="go('horario',this)"><span class="ni-ic">▤</span> Horarios</button>
+            <button class="ni active" data-panel="home"><span class="ni-ic">▦</span> Resumen</button>
+            <button class="ni" data-panel="horario"><span class="ni-ic">▤</span> Horarios</button>
             <span class="sb-label">Administrar</span>
-            <button class="ni" onclick="go('usuarios',this)"><span class="ni-ic">◻</span> Usuarios</button>
-            <button class="ni" onclick="go('grupos',this)"><span class="ni-ic">◻</span> Grupos</button>
-            <button class="ni" onclick="go('salones',this)"><span class="ni-ic">◻</span> Salones</button>
+            <button class="ni" data-panel="usuarios"><span class="ni-ic">◻</span> Usuarios</button>
+            <button class="ni" data-panel="grupos"><span class="ni-ic">◻</span> Grupos</button>
+            <button class="ni" data-panel="salones"><span class="ni-ic">◻</span> Salones</button>
             <span class="sb-label">Sistema</span>
-            <button class="ni" onclick="go('solicitudes',this)"><span class="ni-ic">◻</span> Solicitudes<span class="nb"
-                    id="sol-badge">0</span></button>
-            <button class="ni" onclick="go('notificaciones',this)"><span class="ni-ic">◻</span> Notificaciones<span
-                    class="nb" id="notif-badge">0</span></button>
+            <button class="ni" data-panel="solicitudes"><span class="ni-ic">◻</span> Solicitudes<span class="nb" id="sol-badge">0</span></button>
+            <button class="ni" data-panel="notificaciones"><span class="ni-ic">◻</span> Notificaciones<span class="nb" id="notif-badge">0</span></button>
         </nav>
         <div class="sb-foot">
             <div class="user-row">
-                <div class="av">AD</div>
+                <div class="av"><?= $iniciales ?></div>
                 <div class="u-info">
-                    <div class="u-name">Administrador</div>
+                    <div class="u-name"><?= $admin_nombre_completo ?></div>
                     <div class="u-role">Admin</div>
                 </div>
             </div>
@@ -68,18 +93,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
             <!-- HOME -->
             <div class="panel active" id="panel-home">
                 <div class="stats-grid">
-                    <div class="stat-card"><span class="label">Usuarios</span><span class="value"
-                            id="count-usuarios">—</span><span class="sub">Registrados</span></div>
-                    <div class="stat-card"><span class="label">Profesores</span><span class="value"
-                            id="count-profesores">—</span><span class="sub">Activos</span></div>
-                    <div class="stat-card"><span class="label">Grupos</span><span class="value"
-                            id="count-grupos">—</span><span class="sub">Creados</span></div>
-                    <div class="stat-card"><span class="label">Salones</span><span class="value"
-                            id="count-salones">—</span><span class="sub">Registrados</span></div>
-                    <div class="stat-card accent"><span class="label">Horarios activos</span><span class="value"
-                            id="count-horarios">—</span><span class="sub">Esta semana</span></div>
-                    <div class="stat-card"><span class="label">Solicitudes</span><span class="value"
-                            id="count-solicitudes">—</span><span class="sub">Pendientes</span></div>
+                    <div class="stat-card"><span class="label">Usuarios</span><span class="value" id="count-usuarios">—</span><span class="sub">Registrados</span></div>
+                    <div class="stat-card"><span class="label">Profesores</span><span class="value" id="count-profesores">—</span><span class="sub">Activos</span></div>
+                    <div class="stat-card"><span class="label">Grupos</span><span class="value" id="count-grupos">—</span><span class="sub">Creados</span></div>
+                    <div class="stat-card"><span class="label">Salones</span><span class="value" id="count-salones">—</span><span class="sub">Registrados</span></div>
+                    <div class="stat-card accent"><span class="label">Horarios activos</span><span class="value" id="count-horarios">—</span><span class="sub">Esta semana</span></div>
+                    <div class="stat-card"><span class="label">Solicitudes</span><span class="value" id="count-solicitudes">—</span><span class="sub">Pendientes</span></div>
                 </div>
                 <div class="table-wrap">
                     <div class="table-head">
@@ -97,10 +116,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
                     <div class="empty-state">
                         <div class="icon">▤</div>
                         <h3>Sin grupos creados</h3>
-                        <p>Primero crea un grupo en la sección <strong>Grupos</strong> para poder gestionar su horario.
-                        </p>
-                        <button class="btn btn-p" style="margin-top:8px"
-                            onclick="go('grupos', document.querySelectorAll('.ni')[3])">Ir a Grupos</button>
+                        <p>Primero crea un grupo en la sección <strong>Grupos</strong> para poder gestionar su horario.</p>
+                        <button class="btn btn-p" style="margin-top:8px" data-goto="grupos">Ir a Grupos</button>
                     </div>
                 </div>
                 <div id="sched-content">
@@ -115,8 +132,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
                             <tbody id="sched-body"></tbody>
                         </table>
                     </div>
-                    <p style="font-size:12px;color:var(--muted);margin-top:10px">Haz clic en cualquier celda vacía para
-                        agregar un bloque. Los bloques se guardan por grupo.</p>
+                    <p style="font-size:12px;color:var(--muted);margin-top:10px">Haz clic en cualquier celda vacía para agregar un bloque. Los bloques se guardan por grupo.</p>
                 </div>
             </div>
 
@@ -125,8 +141,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
                 <div class="sec-row">
                     <h2>Usuarios</h2>
                     <div style="display:flex;gap:8px">
-                        <div class="search-box"><span>⌕</span><input id="usr-search" placeholder="Buscar usuario…"
-                                oninput="filterTable('usr-tbody','usr-search')" /></div>
+                        <div class="search-box"><span>⌕</span><input id="usr-search" placeholder="Buscar usuario…" oninput="filterTable('usr-tbody','usr-search')" /></div>
                         <button class="btn btn-p" onclick="openModal('modal-usuario')">+ Nuevo usuario</button>
                     </div>
                 </div>
@@ -144,8 +159,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
                         </thead>
                         <tbody id="usr-tbody">
                             <tr>
-                                <td colspan="6" style="text-align:center;color:var(--muted);padding:30px">No hay
-                                    usuarios registrados aún.</td>
+                                <td colspan="6" style="text-align:center;color:var(--muted);padding:30px">No hay usuarios registrados aún.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -171,8 +185,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
                         </thead>
                         <tbody id="grp-tbody">
                             <tr id="grp-empty-row">
-                                <td colspan="5" style="text-align:center;color:var(--muted);padding:30px">No hay grupos
-                                    creados. Usa <strong>+ Nuevo grupo</strong> para comenzar.</td>
+                                <td colspan="5" style="text-align:center;color:var(--muted);padding:30px">No hay grupos creados. Usa <strong>+ Nuevo grupo</strong> para comenzar.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -185,8 +198,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
                     <h2>Salones</h2>
                     <button class="btn btn-p" onclick="openModal('modal-salon')">+ Nuevo salón</button>
                 </div>
-                <h3 style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:400">Disponibilidad actual
-                </h3>
+                <h3 style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:400">Disponibilidad actual</h3>
                 <div class="avail-grid" id="avail-grid">
                     <p style="color:var(--muted);font-size:13px;grid-column:1/-1">No hay salones registrados aún.</p>
                 </div>
@@ -203,8 +215,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
                             </thead>
                             <tbody id="sal-tbody">
                                 <tr>
-                                    <td colspan="4" style="text-align:center;color:var(--muted);padding:30px">No hay
-                                        salones registrados aún.</td>
+                                    <td colspan="4" style="text-align:center;color:var(--muted);padding:30px">No hay salones registrados aún.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -229,8 +240,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
                         </thead>
                         <tbody id="sol-tbody">
                             <tr>
-                                <td colspan="6" style="text-align:center;color:var(--muted);padding:30px">No hay
-                                    solicitudes pendientes.</td>
+                                <td colspan="6" style="text-align:center;color:var(--muted);padding:30px">No hay solicitudes pendientes.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -238,36 +248,38 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
             </div>
 
             <!-- NOTIFICACIONES -->
-            
-<div class="panel" id="panel-notificaciones">
-    <div class="sec-row">
-        <h2>Notificaciones</h2>
-        <div style="display:flex;gap:8px">
-            <button class="btn btn-o" onclick="markAllRead()">Marcar todas leídas</button>
-            <button class="btn btn-p" onclick="openModal('modal-notif')">+ Nueva notificación</button>
-        </div>
-    </div>
-    <div class="table-wrap">
-        <div class="notif-list" id="notif-list" style="padding:6px 0">
-            <p style="color:var(--muted);padding:20px 16px;font-size:13px">No hay notificaciones enviadas.</p>
-        </div>
-    </div>
-</div>
+            <div class="panel" id="panel-notificaciones">
+                <div class="sec-row">
+                    <h2>Notificaciones</h2>
+                    <div style="display:flex;gap:8px">
+                        <button class="btn btn-o" onclick="markAllRead()">Marcar todas leídas</button>
+                        <button class="btn btn-p" onclick="openModal('modal-notif')">+ Nueva notificación</button>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <div class="notif-list" id="notif-list" style="padding:6px 0">
+                        <p style="color:var(--muted);padding:20px 16px;font-size:13px">No hay notificaciones enviadas.</p>
+                    </div>
+                </div>
+            </div>
 
         </div>
     </div>
 
-    <!-- MODALS -->
+    <!-- ===================== MODALS ===================== -->
 
-    <!-- Modal: Bloque -->
+    <!-- Modal: Bloque de horario -->
     <div class="overlay" id="modal-bloque">
         <div class="modal">
             <h2 id="bloque-modal-title">Agregar bloque</h2>
             <p class="sub">Completa los datos del bloque de clase</p>
-            <div class="field"><label>Materia / Nombre</label><input id="blk-nombre" placeholder="Ej: Matemáticas" />
+            <div class="field">
+                <label>Materia / Nombre</label>
+                <input id="blk-nombre" placeholder="Ej: Matemáticas" />
             </div>
             <div class="field-row">
-                <div class="field"><label>Día</label>
+                <div class="field">
+                    <label>Día</label>
                     <select id="blk-dia">
                         <option value="lunes">Lunes</option>
                         <option value="martes">Martes</option>
@@ -277,7 +289,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
                         <option value="sabado">Sábado</option>
                     </select>
                 </div>
-                <div class="field"><label>Salón</label>
+                <div class="field">
+                    <label>Salón</label>
                     <select id="blk-salon">
                         <option value="">— Sin salones —</option>
                     </select>
@@ -287,12 +300,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
                 <div class="field"><label>Hora inicio</label><input type="time" id="blk-inicio" value="07:00" /></div>
                 <div class="field"><label>Hora fin</label><input type="time" id="blk-fin" value="09:00" /></div>
             </div>
-            <div class="field"><label>Profesor</label>
+            <div class="field">
+                <label>Profesor</label>
                 <select id="blk-prof">
                     <option value="Sin asignar">Sin asignar</option>
                 </select>
             </div>
-            <div class="field"><label>Color del bloque</label>
+            <div class="field">
+                <label>Color del bloque</label>
                 <div class="color-pick" id="color-pick">
                     <div class="cp sel" style="background:var(--c0)" data-c="c0" onclick="selectColor(this)"></div>
                     <div class="cp" style="background:var(--c1)" data-c="c1" onclick="selectColor(this)"></div>
@@ -321,17 +336,16 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
                 <div class="field"><label>Apellido</label><input id="usr-apellido" placeholder="Pérez" /></div>
             </div>
             <div class="field"><label>Nickname</label><input id="usr-nick" placeholder="juan_perez" /></div>
-            <div class="field"><label>Correo</label><input type="email" id="usr-correo" placeholder="juan@correo.co" />
-            </div>
-            <div class="field"><label>Rol</label>
+            <div class="field"><label>Correo</label><input type="email" id="usr-correo" placeholder="juan@correo.co" /></div>
+            <div class="field">
+                <label>Rol</label>
                 <select id="usr-rol">
                     <option value="3">Estudiante</option>
                     <option value="2">Profesor</option>
                     <option value="1">Administrador</option>
                 </select>
             </div>
-            <div class="field"><label>Contraseña</label><input type="password" id="usr-pass" placeholder="••••••••" />
-            </div>
+            <div class="field"><label>Contraseña</label><input type="password" id="usr-pass" placeholder="••••••••" /></div>
             <div class="modal-foot">
                 <button class="btn btn-o" onclick="closeModal('modal-usuario')">Cancelar</button>
                 <button class="btn btn-p" onclick="saveUsuario()">Guardar</button>
@@ -347,12 +361,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
             <div class="field">
                 <label>Nombre del grupo / Salón</label>
                 <input id="grp-nombre" placeholder="Ej: 11-B, 10-2, Grado 9A, 3141033…" />
-                <span class="field-hint">Usa el formato que maneja tu institución (letras, números o
-                    combinación).</span>
+                <span class="field-hint">Usa el formato que maneja tu institución (letras, números o combinación).</span>
             </div>
-            <div class="field"><label>Descripción</label><textarea id="grp-desc" rows="3"
-                    placeholder="Descripción del grupo…"></textarea></div>
-            <div class="field"><label>Profesor asignado</label>
+            <div class="field">
+                <label>Descripción</label>
+                <textarea id="grp-desc" rows="3" placeholder="Descripción del grupo…"></textarea>
+            </div>
+            <div class="field">
+                <label>Profesor asignado</label>
                 <select id="grp-prof">
                     <option value="">Sin asignar</option>
                 </select>
@@ -369,54 +385,46 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
         <div class="modal">
             <h2>Nuevo salón</h2>
             <p class="sub">Registra el salón y su capacidad</p>
-            <div class="field"><label>Nombre del salón</label><input id="sal-nombre"
-                    placeholder="Ej: Lab 104, Aula 3…" /></div>
-            <div class="field"><label>Capacidad</label><input type="number" id="sal-cap" placeholder="30" min="1" />
-            </div>
+            <div class="field"><label>Nombre del salón</label><input id="sal-nombre" placeholder="Ej: Lab 104, Aula 3…" /></div>
+            <div class="field"><label>Capacidad</label><input type="number" id="sal-cap" placeholder="30" min="1" /></div>
             <div class="modal-foot">
                 <button class="btn btn-o" onclick="closeModal('modal-salon')">Cancelar</button>
                 <button class="btn btn-p" onclick="saveSalon()">Guardar</button>
             </div>
         </div>
     </div>
-    <!-- Modal: Nueva Notificación (para todos) -->
-<div class="overlay" id="modal-notif">
-    <div class="modal" style="max-width:540px">
-        <h2>Nueva notificación</h2>
-        <p class="sub">El mensaje se enviará a todos los usuarios registrados</p>
 
-        <div class="field">
-            <label>Asunto</label>
-            <input id="notif-asunto" placeholder="Ej: Cambios en el horario de la semana…" />
-        </div>
-
-        <div class="field">
-            <label>Tipo</label>
-            <select id="notif-tipo-global">
-                <option value="Sistema">Sistema</option>
-                <option value="Urgente">Urgente</option>
-                <option value="Aviso">Aviso General</option>
-            </select>
-        </div>
-
-        <div class="field">
-            <label>Mensaje</label>
-            <textarea id="notif-mensaje-global" rows="5"
-                placeholder="Escribe aquí el contenido del mensaje que verán todos los usuarios…"
-                style="resize:vertical"></textarea>
-        </div>
-
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:4px;display:flex;align-items:center;gap:10px">
-            <span style="font-size:18px">📢</span>
-            <span style="font-size:12px;color:var(--muted);line-height:1.5">Esta notificación será visible para <strong style="color:var(--text)">todos los usuarios</strong> la próxima vez que inicien sesión.</span>
-        </div>
-
-        <div class="modal-foot">
-            <button class="btn btn-o" onclick="closeModal('modal-notif')">Cancelar</button>
-            <button class="btn btn-p" onclick="enviarNotificacionGlobal()">📨 Enviar a todos</button>
+    <!-- Modal: Nueva Notificación -->
+    <div class="overlay" id="modal-notif">
+        <div class="modal" style="max-width:540px">
+            <h2>Nueva notificación</h2>
+            <p class="sub">El mensaje se enviará a todos los usuarios registrados</p>
+            <div class="field">
+                <label>Asunto</label>
+                <input id="notif-asunto" placeholder="Ej: Cambios en el horario de la semana…" />
+            </div>
+            <div class="field">
+                <label>Tipo</label>
+                <select id="notif-tipo-global">
+                    <option value="Sistema">Sistema</option>
+                    <option value="Urgente">Urgente</option>
+                    <option value="Aviso">Aviso General</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Mensaje</label>
+                <textarea id="notif-mensaje-global" rows="5" placeholder="Escribe aquí el contenido del mensaje que verán todos los usuarios…" style="resize:vertical"></textarea>
+            </div>
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:4px;display:flex;align-items:center;gap:10px">
+                <span style="font-size:18px">📢</span>
+                <span style="font-size:12px;color:var(--muted);line-height:1.5">Esta notificación será visible para <strong style="color:var(--text)">todos los usuarios</strong> la próxima vez que inicien sesión.</span>
+            </div>
+            <div class="modal-foot">
+                <button class="btn btn-o" onclick="closeModal('modal-notif')">Cancelar</button>
+                <button class="btn btn-p" onclick="enviarNotificacionGlobal()">📨 Enviar a todos</button>
+            </div>
         </div>
     </div>
-</div>
 
     <script src="assets/js/admin.js"></script>
 </body>
