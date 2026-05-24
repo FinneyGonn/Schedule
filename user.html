@@ -1594,26 +1594,47 @@
             }
         }
 
+
         async function enviarSolicitudRol() {
-            const rol = document.getElementById('rol-solicitado').value;
-            if (!rol) { alert('Selecciona un rol.'); return; }
+            const rolSelect = document.getElementById('rol-solicitado');
+            const rol_id = parseInt(rolSelect.value);
+
+            if (!rol_id) {
+                alert('Por favor selecciona un rol (Profesor o Administrador).');
+                return;
+            }
+
             const motivo = document.getElementById('rol-motivo').value.trim();
 
             try {
-                const resp = await fetch('api/v1/admin/solicitudes/crear.php', {
+                const response = await fetch('api/v1/admin/solicitudes/crear.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ rol_id: rol, motivo: motivo })
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        rol_id: rol_id,
+                        motivo: motivo
+                    })
                 });
-                const data = await resp.json();
-                if (data.success || data.ok) {
-                    alert('Solicitud enviada con éxito.');
-                    closeModal('modal-rol');
-                } else {
-                    alert('Error: ' + data.mensaje);
+
+                if (!response.ok) {
+                    throw new Error('Error HTTP: ' + response.status);
                 }
-            } catch (err) {
-                alert('Error al conectar con el servidor.');
+
+                const data = await response.json();
+
+                if (data.success || data.ok) {
+                    alert('✅ Solicitud enviada correctamente. El administrador la revisará.');
+                    closeModal('modal-rol');
+                    document.getElementById('rol-motivo').value = ''; // limpiar motivo
+                } else {
+                    alert('❌ ' + (data.message || data.mensaje || 'No se pudo enviar la solicitud'));
+                }
+
+            } catch (error) {
+                console.error('Error completo:', error);
+                alert('Error de conexión con el servidor. Revisa la consola (F12) para más detalles.');
             }
         }
 
