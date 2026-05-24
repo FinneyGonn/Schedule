@@ -10,32 +10,22 @@ error_reporting(E_ALL);
 require_once '../../../config/config.php';
 
 // ── 1. Autenticación ─────────────────────────────────────────
-if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
+if (!isset($_SESSION['user_id']) || (int)$_SESSION['rol_id'] !== 1) {
     http_response_code(403);
-    echo json_encode(['ok' => false, 'mensaje' => 'Acceso denegado.']);
+    echo json_encode(['ok' => false, 'mensaje' => 'Acceso denegado - rol: ' . ($_SESSION['rol_id'] ?? 'null')]);
     exit;
 }
 
-// ── 2. Validación CSRF ───────────────────────────────────────
-$method = $_SERVER['REQUEST_METHOD'];
-
-if (in_array($method, ['POST', 'PUT', 'DELETE', 'PATCH'])) {
-    $tokenHeader = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
-    if (empty($tokenHeader) || !hash_equals($_SESSION['csrf_token'] ?? '', $tokenHeader)) {
-        http_response_code(403);
-        echo json_encode(['ok' => false, 'mensaje' => 'Token CSRF inválido.']);
-        exit;
-    }
-}
-
-// ── 3. Verificar conexión ────────────────────────────────────
+// ── 2. Verificar conexión ────────────────────────────────────
 if (!isset($conn) || $conn->connect_error) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'mensaje' => 'Sin conexión a la base de datos.']);
     exit;
 }
 
-// ── 4. Router ────────────────────────────────────────────────
+$method = $_SERVER['REQUEST_METHOD'];
+
+// ── 3. Router ────────────────────────────────────────────────
 try {
     match ($method) {
         'GET'  => listarSolicitudes($conn),
