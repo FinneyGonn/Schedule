@@ -56,8 +56,8 @@ function listarSolicitudes(mysqli $conn): void
                 u.nombre,
                 u.apellido,
                 CONCAT(u.nombre, ' ', u.apellido) AS nombre_completo,
-                ra.nombre_rol  AS rol_actual,
-                rs.nombre_rol  AS nombre_rol,
+                ra.nombre  AS rol_actual,
+                rs.nombre  AS nombre_rol,
                 s.estado,
                 s.motivo_respuesta,
                 DATE_FORMAT(s.fecha_solicitud, '%d/%m/%Y %H:%i') AS created_at
