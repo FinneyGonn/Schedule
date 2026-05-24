@@ -52,18 +52,21 @@ try {
         exit;
     }
 
-    // Insertar solicitud
+    // Guardar el rol actual del usuario para poder revertirlo si se revoca
+    $rol_anterior_id = (int)$_SESSION['rol_id'];
+
+    // Insertar solicitud con rol_anterior_id
     $stmt = $conn->prepare(
-        "INSERT INTO solicitudes_rol (usuario_id, rol_solicitado_id, motivo_solicitud, estado)
-         VALUES (?, ?, ?, 'pendiente')"
+        "INSERT INTO solicitudes_rol (usuario_id, rol_solicitado_id, rol_anterior_id, motivo_solicitud, estado)
+         VALUES (?, ?, ?, ?, 'pendiente')"
     );
-    $stmt->bind_param('iis', $user_id, $rol_id, $motivo);
+    $stmt->bind_param('iiis', $user_id, $rol_id, $rol_anterior_id, $motivo);
 
     if (!$stmt->execute()) {
         throw new Exception($stmt->error);
     }
 
-    // Obtener nombre del solicitante con prepared statement
+    // Obtener nombre del solicitante
     $uStmt = $conn->prepare("SELECT nombre, apellido FROM usuarios WHERE id = ? LIMIT 1");
     $uStmt->bind_param('i', $user_id);
     $uStmt->execute();

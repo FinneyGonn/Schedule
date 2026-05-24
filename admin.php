@@ -2,23 +2,19 @@
 define('PAGINA_HTML', true);
 require_once 'config/config.php';
 
-// Verificar sesión y rol de administrador
 if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
     header('Location: index.html');
     exit();
 }
 
-// Generar token CSRF si no existe
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Datos del admin para mostrar en UI (sanitizados)
-$admin_nombre   = htmlspecialchars($_SESSION['nombre']    ?? 'Administrador', ENT_QUOTES, 'UTF-8');
-$admin_apellido = htmlspecialchars($_SESSION['apellido']  ?? '',               ENT_QUOTES, 'UTF-8');
+$admin_nombre   = htmlspecialchars($_SESSION['nombre']   ?? 'Administrador', ENT_QUOTES, 'UTF-8');
+$admin_apellido = htmlspecialchars($_SESSION['apellido'] ?? '',               ENT_QUOTES, 'UTF-8');
 $admin_nombre_completo = trim($admin_nombre . ' ' . $admin_apellido);
 
-// Iniciales para el avatar (máx. 2 caracteres)
 $partes    = array_filter(explode(' ', $admin_nombre_completo));
 $iniciales = '';
 foreach ($partes as $p) {
@@ -26,27 +22,19 @@ foreach ($partes as $p) {
     if (mb_strlen($iniciales) >= 2) break;
 }
 if (empty($iniciales)) $iniciales = 'AD';
-$iniciales = htmlspecialchars($iniciales, ENT_QUOTES, 'UTF-8');
-
+$iniciales  = htmlspecialchars($iniciales, ENT_QUOTES, 'UTF-8');
 $csrf_token = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
 ?>
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Horarios — Admin Dashboard</title>
-
-    <!-- Token CSRF disponible para JS -->
     <meta name="csrf-token" content="<?= $csrf_token ?>">
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="assets/css/admin.css" />
 </head>
-
 <body>
 
     <!-- SIDEBAR -->
@@ -101,9 +89,7 @@ $csrf_token = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
                     <div class="stat-card"><span class="label">Solicitudes</span><span class="value" id="count-solicitudes">—</span><span class="sub">Pendientes</span></div>
                 </div>
                 <div class="table-wrap">
-                    <div class="table-head">
-                        <h3>Actividad reciente</h3>
-                    </div>
+                    <div class="table-head"><h3>Actividad reciente</h3></div>
                     <div class="notif-list activity-list" style="padding:6px 0">
                         <p style="color:var(--muted);padding:20px 16px;font-size:13px">Cargando actividad…</p>
                     </div>
@@ -132,7 +118,7 @@ $csrf_token = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
                             <tbody id="sched-body"></tbody>
                         </table>
                     </div>
-                    <p style="font-size:12px;color:var(--muted);margin-top:10px">Haz clic en cualquier celda vacía para agregar un bloque. Los bloques se guardan por grupo.</p>
+                    <p style="font-size:12px;color:var(--muted);margin-top:10px">Haz clic en cualquier celda vacía para agregar un bloque.</p>
                 </div>
             </div>
 
@@ -149,18 +135,12 @@ $csrf_token = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
                     <table>
                         <thead>
                             <tr>
-                                <th>Nombre</th>
-                                <th>Nickname</th>
-                                <th>Correo</th>
-                                <th>Rol</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
+                                <th>Nombre</th><th>Nickname</th><th>Correo</th>
+                                <th>Rol</th><th>Estado</th><th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="usr-tbody">
-                            <tr>
-                                <td colspan="6" style="text-align:center;color:var(--muted);padding:30px">No hay usuarios registrados aún.</td>
-                            </tr>
+                            <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px">No hay usuarios registrados aún.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -176,11 +156,8 @@ $csrf_token = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
                     <table>
                         <thead>
                             <tr>
-                                <th>Nombre / Salón</th>
-                                <th>Descripción</th>
-                                <th>Miembros</th>
-                                <th>Profesor asignado</th>
-                                <th>Acciones</th>
+                                <th>Nombre / Salón</th><th>Descripción</th>
+                                <th>Miembros</th><th>Profesor asignado</th><th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="grp-tbody">
@@ -206,17 +183,10 @@ $csrf_token = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
                     <div class="table-wrap">
                         <table>
                             <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Capacidad</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
-                                </tr>
+                                <tr><th>Nombre</th><th>Capacidad</th><th>Estado</th><th>Acciones</th></tr>
                             </thead>
                             <tbody id="sal-tbody">
-                                <tr>
-                                    <td colspan="4" style="text-align:center;color:var(--muted);padding:30px">No hay salones registrados aún.</td>
-                                </tr>
+                                <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:30px">No hay salones registrados aún.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -224,47 +194,22 @@ $csrf_token = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
             </div>
 
             <!-- SOLICITUDES -->
-<div class="panel" id="panel-solicitudes">
-    <h2 class="sec-title">Solicitudes de Rol</h2>
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>Usuario</th>
-                    <th>Rol actual</th>
-                    <th>Rol solicitado</th>
-                    <th>Fecha</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="sol-tbody">
-                <tr>
-                    <td colspan="6" style="text-align:center;color:var(--muted);padding:30px">No hay solicitudes pendientes.</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<!-- ===================== MODAL: RESPONDER SOLICITUD ===================== -->
-<div class="overlay" id="modal-responder-solicitud">
-    <div class="modal" style="max-width:520px">
-        <h2 id="modal-responder-titulo">Responder Solicitud</h2>
-        <p class="sub" id="modal-responder-sub">Usuario: <strong id="solicitud-usuario"></strong></p>
-        
-        <div class="field">
-            <label>Motivo <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
-            <textarea id="motivo-respuesta" rows="4" placeholder="Explica brevemente el motivo de tu decisión..."></textarea>
-        </div>
-
-        <div class="modal-foot">
-            <button class="btn btn-o" onclick="closeModal('modal-responder-solicitud')">Cancelar</button>
-            <button class="btn btn-s" id="btn-aprobar-final" onclick="confirmarRespuesta('aprobado')">✅ Aprobar</button>
-            <button class="btn btn-d" id="btn-rechazar-final" onclick="confirmarRespuesta('rechazado')">❌ Rechazar</button>
-        </div>
-    </div>
-</div>
+            <div class="panel" id="panel-solicitudes">
+                <h2 class="sec-title">Solicitudes de Rol</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Usuario</th><th>Rol actual</th><th>Rol solicitado</th>
+                                <th>Fecha</th><th>Estado</th><th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sol-tbody">
+                            <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px">No hay solicitudes pendientes.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
             <!-- NOTIFICACIONES -->
             <div class="panel" id="panel-notificaciones">
@@ -286,6 +231,43 @@ $csrf_token = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
     </div>
 
     <!-- ===================== MODALS ===================== -->
+
+    <!-- Modal: Responder solicitud (aprobar / rechazar) -->
+    <div class="overlay" id="modal-responder-solicitud">
+        <div class="modal" style="max-width:520px">
+            <h2 id="modal-responder-titulo">Responder Solicitud</h2>
+            <p class="sub" id="modal-responder-sub">Usuario: <strong id="solicitud-usuario"></strong></p>
+            <div class="field">
+                <label>Motivo <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+                <textarea id="motivo-respuesta" rows="4" placeholder="Explica brevemente el motivo de tu decisión..."></textarea>
+            </div>
+            <div class="modal-foot">
+                <button class="btn btn-o" onclick="closeModal('modal-responder-solicitud')">Cancelar</button>
+                <button class="btn btn-s" id="btn-aprobar-final" onclick="confirmarRespuesta('aprobado')">✅ Aprobar</button>
+                <button class="btn btn-d" id="btn-rechazar-final" onclick="confirmarRespuesta('rechazado')">❌ Rechazar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Revocar aprobación -->
+    <div class="overlay" id="modal-revocar-solicitud">
+        <div class="modal" style="max-width:520px">
+            <h2>Revocar aprobación</h2>
+            <p class="sub">El rol del usuario será devuelto al que tenía antes de esta solicitud.</p>
+            <div class="field">
+                <label>Motivo de la revocación <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+                <textarea id="motivo-revocar" rows="4" placeholder="Ej: Se aprobó por error, el usuario no cumple los requisitos..."></textarea>
+            </div>
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:4px;display:flex;align-items:center;gap:10px">
+                <span style="font-size:18px">⚠️</span>
+                <span style="font-size:12px;color:var(--muted);line-height:1.5">Esta acción <strong style="color:var(--text)">cambiará el rol del usuario</strong> de vuelta al que tenía antes.</span>
+            </div>
+            <div class="modal-foot">
+                <button class="btn btn-o" onclick="closeModal('modal-revocar-solicitud')">Cancelar</button>
+                <button class="btn btn-d" onclick="confirmarRevocacion()">🔄 Confirmar revocación</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal: Bloque de horario -->
     <div class="overlay" id="modal-bloque">
@@ -310,9 +292,7 @@ $csrf_token = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
                 </div>
                 <div class="field">
                     <label>Salón</label>
-                    <select id="blk-salon">
-                        <option value="">— Sin salones —</option>
-                    </select>
+                    <select id="blk-salon"><option value="">— Sin salones —</option></select>
                 </div>
             </div>
             <div class="field-row">
@@ -321,9 +301,7 @@ $csrf_token = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
             </div>
             <div class="field">
                 <label>Profesor</label>
-                <select id="blk-prof">
-                    <option value="Sin asignar">Sin asignar</option>
-                </select>
+                <select id="blk-prof"><option value="Sin asignar">Sin asignar</option></select>
             </div>
             <div class="field">
                 <label>Color del bloque</label>
@@ -379,8 +357,8 @@ $csrf_token = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
             <p class="sub">Define el nombre del grupo o salón de tu institución</p>
             <div class="field">
                 <label>Nombre del grupo / Salón</label>
-                <input id="grp-nombre" placeholder="Ej: 11-B, 10-2, Grado 9A, 3141033…" />
-                <span class="field-hint">Usa el formato que maneja tu institución (letras, números o combinación).</span>
+                <input id="grp-nombre" placeholder="Ej: 11-B, 10-2, Grado 9A…" />
+                <span class="field-hint">Usa el formato que maneja tu institución.</span>
             </div>
             <div class="field">
                 <label>Descripción</label>
@@ -388,9 +366,7 @@ $csrf_token = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
             </div>
             <div class="field">
                 <label>Profesor asignado</label>
-                <select id="grp-prof">
-                    <option value="">Sin asignar</option>
-                </select>
+                <select id="grp-prof"><option value="">Sin asignar</option></select>
             </div>
             <div class="modal-foot">
                 <button class="btn btn-o" onclick="closeModal('modal-grupo')">Cancelar</button>
@@ -432,7 +408,7 @@ $csrf_token = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
             </div>
             <div class="field">
                 <label>Mensaje</label>
-                <textarea id="notif-mensaje-global" rows="5" placeholder="Escribe aquí el contenido del mensaje que verán todos los usuarios…" style="resize:vertical"></textarea>
+                <textarea id="notif-mensaje-global" rows="5" placeholder="Escribe aquí el contenido del mensaje…" style="resize:vertical"></textarea>
             </div>
             <div style="background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:4px;display:flex;align-items:center;gap:10px">
                 <span style="font-size:18px">📢</span>
@@ -447,5 +423,4 @@ $csrf_token = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
 
     <script src="assets2/js/admin.js"></script>
 </body>
-
 </html>

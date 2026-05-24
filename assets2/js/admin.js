@@ -98,7 +98,6 @@ function go(name, activeBtn = null) {
         const b = document.getElementById('notif-badge');
         if (b) b.textContent = '0';
     }
-    if (name === 'solicitudes') cargarSolicitudes();
     if (name === 'horario') renderSchedPanel();
 }
 
@@ -265,23 +264,34 @@ async function cargarSolicitudes() {
 
         // esc() en todos los campos para evitar XSS
         tbody.innerHTML = data.map(s => `
-            <tr data-id="${Number(s.id)}">
-                <td>${esc(s.nombre)} ${esc(s.apellido ?? '')}</td>
-                <td><span class="badge">${esc(s.rol_actual ?? '—')}</span></td>
-                <td><span class="badge badge-prof">${esc(s.nombre_rol)}</span></td>
+            <tr>
+                <td>${esc(s.nombre)}</td>
+                <td>—</td>
+                <td>${esc(s.nombre_rol)}</td>
                 <td>${esc(s.created_at)}</td>
-                <td><span class="badge ${s.estado === 'pendiente' ? 'badge-pend' : s.estado === 'aprobado' ? 'badge-act' : 'badge-rej'}">${esc(s.estado)}</span></td>
+                <td><span class="badge ${s.estado === 'pendiente' ? 'badge-pend' : 'badge-act'}">${esc(s.estado)}</span></td>
                 <td>
                     <div class="actions-cell">
-                        ${s.estado === 'pendiente'
-                ? `<button class="btn btn-s btn-sm" onclick="responderSolicitud(${Number(s.id)}, 'aprobado')">Aprobar</button>
-                               <button class="btn btn-d btn-sm" onclick="responderSolicitud(${Number(s.id)}, 'rechazado')">Rechazar</button>`
-                : `<span style="color:var(--muted);font-size:12px">Procesada</span>`
-            }
+                        <button class="btn btn-s btn-sm" onclick="responderSolicitud(${Number(s.id)}, 'aprobado', this)">Aprobar</button>
+                        <button class="btn btn-d btn-sm" onclick="responderSolicitud(${Number(s.id)}, 'rechazado', this)">Rechazar</button>
                     </div>
                 </td>
             </tr>`).join('');
     } catch (e) { console.error('Error solicitudes:', e); }
+}
+
+async function responderSolicitud(id, decision, btn) {
+    if (!confirm(`¿${decision === 'aprobado' ? 'Aprobar' : 'Rechazar'} esta solicitud?`)) return;
+    try {
+        await apiFetch('api/v1/admin/solicitudes.php', {
+            method: 'POST',
+            body: JSON.stringify({ id, decision })
+        });
+        cargarSolicitudes();
+        cargarEstadisticas();
+    } catch (e) {
+        alert('Error al procesar la solicitud.');
+    }
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -838,6 +848,38 @@ async function confirmarRespuesta(decision) {
     } catch (e) {
         console.error(e);
         alert('Error de conexión con el servidor');
+    }
+}
+
+
+// ===================== REVOCAR APROBACIÓN =====================
+let solicitudRevocarId = null;
+
+function abrirModalRevocar(id) {
+    solicitudRevocarId = id;
+    document.getElementById('motivo-revocar').value = '';
+    openModal('modal-revocar-solicitud');
+}
+
+async function confirmarRevocacion() {
+    if (!solicitudRevocarId) return;
+    const motivo = document.getElementById('motivo-revocar').value.trim();
+    try {
+        const data = await apiFetch('api/v1/admin/solicitudes.php', {
+            method: 'DELETE',
+            body: JSON.stringify({ id: solicitudRevocarId, motivo })
+        });
+        if (data.ok) {
+            closeModal('modal-revocar-solicitud');
+            alert('✅ Aprobación revocada y rol restaurado correctamente.');
+            cargarSolicitudes();
+            cargarEstadisticas();
+        } else {
+            alert(data.mensaje || 'Error al revocar la solicitud.');
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Error de conexión con el servidor.');
     }
 }
 
