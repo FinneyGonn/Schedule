@@ -4,6 +4,8 @@
 //  Métodos: GET (listar) | POST (aprobar o rechazar con motivo)
 // ============================================================
 header('Content-Type: application/json; charset=utf-8');
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
 require_once '../../../config/config.php';
 
@@ -41,11 +43,9 @@ try {
         default => respuesta405(),
     };
 } catch (Exception $e) {
-    error_log('[solicitudes.php] ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['ok' => false, 'mensaje' => 'Error interno del servidor.']);
+    echo json_encode(['ok' => false, 'mensaje' => $e->getMessage()]);
 }
-
 // ════════════════════════════════════════════════════════════
 //  GET — Listar todas las solicitudes
 // ════════════════════════════════════════════════════════════
