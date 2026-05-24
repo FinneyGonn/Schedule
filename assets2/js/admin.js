@@ -264,34 +264,23 @@ async function cargarSolicitudes() {
 
         // esc() en todos los campos para evitar XSS
         tbody.innerHTML = data.map(s => `
-            <tr>
-                <td>${esc(s.nombre)}</td>
-                <td>—</td>
-                <td>${esc(s.nombre_rol)}</td>
+            <tr data-id="${Number(s.id)}">
+                <td>${esc(s.nombre)} ${esc(s.apellido ?? '')}</td>
+                <td><span class="badge">${esc(s.rol_actual ?? '—')}</span></td>
+                <td><span class="badge badge-prof">${esc(s.nombre_rol)}</span></td>
                 <td>${esc(s.created_at)}</td>
-                <td><span class="badge ${s.estado === 'pendiente' ? 'badge-pend' : 'badge-act'}">${esc(s.estado)}</span></td>
+                <td><span class="badge ${s.estado === 'pendiente' ? 'badge-pend' : s.estado === 'aprobado' ? 'badge-act' : 'badge-rej'}">${esc(s.estado)}</span></td>
                 <td>
                     <div class="actions-cell">
-                        <button class="btn btn-s btn-sm" onclick="responderSolicitud(${Number(s.id)}, 'aprobado', this)">Aprobar</button>
-                        <button class="btn btn-d btn-sm" onclick="responderSolicitud(${Number(s.id)}, 'rechazado', this)">Rechazar</button>
+                        ${s.estado === 'pendiente'
+                ? `<button class="btn btn-s btn-sm" onclick="responderSolicitud(${Number(s.id)}, 'aprobado')">Aprobar</button>
+                               <button class="btn btn-d btn-sm" onclick="responderSolicitud(${Number(s.id)}, 'rechazado')">Rechazar</button>`
+                : `<span style="color:var(--muted);font-size:12px">Procesada</span>`
+            }
                     </div>
                 </td>
             </tr>`).join('');
     } catch (e) { console.error('Error solicitudes:', e); }
-}
-
-async function responderSolicitud(id, decision, btn) {
-    if (!confirm(`¿${decision === 'aprobado' ? 'Aprobar' : 'Rechazar'} esta solicitud?`)) return;
-    try {
-        await apiFetch('api/v1/admin/solicitudes.php', {
-            method: 'POST',
-            body: JSON.stringify({ id, decision })
-        });
-        cargarSolicitudes();
-        cargarEstadisticas();
-    } catch (e) {
-        alert('Error al procesar la solicitud.');
-    }
 }
 
 /* ══════════════════════════════════════════════════════════════
