@@ -1,8 +1,6 @@
 <?php
 session_start();
-
-// Ruta corregida (subimos 3 niveles desde api/v1/admin/solicitudes/)
-require_once '../../../config/config.php';
+require_once '../../../../config/config.php';
 
 header('Content-Type: application/json');
 
@@ -43,7 +41,7 @@ try {
     }
 
 } catch (Exception $e) {
-    error_log("Error en crear solicitud: " . $e->getMessage());
+    error_log("Error crear solicitud: " . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
 }
-?>
+?>..
