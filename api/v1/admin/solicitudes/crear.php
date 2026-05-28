@@ -1,7 +1,5 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
 require_once '../../../../config/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -74,11 +72,11 @@ try {
     }
 
     // Obtener nombre del solicitante
-    $uStmt = $conn->prepare("SELECT nombre, apellido FROM usuarios WHERE id = ? LIMIT 1");
+    $uStmt = $conn->prepare("SELECT Nombre, Apellido FROM usuarios WHERE id = ? LIMIT 1");
     $uStmt->bind_param('i', $user_id);
     $uStmt->execute();
     $uRow = $uStmt->get_result()->fetch_assoc();
-    $nombreSolicitante = trim(($uRow['nombre'] ?? '') . ' ' . ($uRow['apellido'] ?? ''));
+    $nombreSolicitante = trim(($uRow['Nombre'] ?? '') . ' ' . ($uRow['Apellido'] ?? ''));
 
     $roles    = [1 => 'Administrador', 2 => 'Profesor'];
     $asunto   = 'Nueva solicitud de cambio de rol';

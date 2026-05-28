@@ -56,21 +56,22 @@ try {
 // ════════════════════════════════════════════════════════════
 function listarUsuarios(mysqli $conn): void
 {
-    // Detectar si la columna se llama 'nickname' o 'usuario'
-    $col    = $conn->query("SHOW COLUMNS FROM usuarios LIKE 'nickname'");
-    $campo  = ($col && $col->num_rows > 0) ? 'u.nickname' : 'u.usuario';
+    // Detectar columnas que pueden variar entre entornos
+    $colNick = $conn->query("SHOW COLUMNS FROM usuarios LIKE 'nickname'");
+    $campo   = ($colNick && $colNick->num_rows > 0) ? 'u.nickname' : 'u.usuario';
 
-    // Prepared statement: aunque no hay parámetros externos aquí,
-    // usamos query normal porque la consulta es estática y segura.
+    $colAct  = $conn->query("SHOW COLUMNS FROM usuarios LIKE 'activo'");
+    $activo  = ($colAct && $colAct->num_rows > 0) ? 'u.activo' : '1 AS activo';
+
     $sql = "SELECT
                 u.id,
-                u.nombre,
-                u.apellido,
+                u.Nombre        AS nombre,
+                u.Apellido      AS apellido,
                 $campo          AS nickname,
                 u.correo,
                 u.rol_id,
                 r.nombre        AS rol,
-                u.activo
+                $activo
             FROM usuarios u
             INNER JOIN roles r ON u.rol_id = r.id
             ORDER BY u.id DESC";
@@ -139,11 +140,20 @@ function crearUsuario(mysqli $conn): void
     $col   = $conn->query("SHOW COLUMNS FROM usuarios LIKE 'nickname'");
     $campo = ($col && $col->num_rows > 0) ? 'nickname' : 'usuario';
 
-    // INSERT con prepared statement — elimina SQL Injection
-    $stmt = $conn->prepare(
-        "INSERT INTO usuarios (Nombre, Apellido, $campo, correo, contrasena, rol_id, activo)
-         VALUES (?, ?, ?, ?, ?, ?, 1)"
-    );
+    $colAct = $conn->query("SHOW COLUMNS FROM usuarios LIKE 'activo'");
+    $hasAct = ($colAct && $colAct->num_rows > 0);
+
+    if ($hasAct) {
+        $stmt = $conn->prepare(
+            "INSERT INTO usuarios (Nombre, Apellido, $campo, correo, contrasena, rol_id, activo)
+             VALUES (?, ?, ?, ?, ?, ?, 1)"
+        );
+    } else {
+        $stmt = $conn->prepare(
+            "INSERT INTO usuarios (Nombre, Apellido, $campo, correo, contrasena, rol_id)
+             VALUES (?, ?, ?, ?, ?, ?)"
+        );
+    }
     $stmt->bind_param('sssssi', $nombre, $apellido, $nickname, $correo, $hash, $rol_id);
 
     if (!$stmt->execute()) {
