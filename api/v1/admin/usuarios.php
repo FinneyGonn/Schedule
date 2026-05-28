@@ -69,7 +69,7 @@ function listarUsuarios(mysqli $conn): void
                 $campo          AS nickname,
                 u.correo,
                 u.rol_id,
-                r.nombre_rol    AS rol,
+                r.nombre        AS rol,
                 u.activo
             FROM usuarios u
             INNER JOIN roles r ON u.rol_id = r.id
@@ -141,7 +141,7 @@ function crearUsuario(mysqli $conn): void
 
     // INSERT con prepared statement — elimina SQL Injection
     $stmt = $conn->prepare(
-        "INSERT INTO usuarios (nombre, apellido, $campo, correo, password, rol_id, activo)
+        "INSERT INTO usuarios (Nombre, Apellido, $campo, correo, contrasena, rol_id, activo)
          VALUES (?, ?, ?, ?, ?, ?, 1)"
     );
     $stmt->bind_param('sssssi', $nombre, $apellido, $nickname, $correo, $hash, $rol_id);

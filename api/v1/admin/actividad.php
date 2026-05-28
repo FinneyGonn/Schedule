@@ -27,14 +27,14 @@ try {
     // nombre del usuario, rol solicitado, estado y fecha
     $query = "SELECT
                 s.id,
-                u.nombre,
-                r.nombre_rol,
+                CONCAT(u.Nombre, ' ', u.Apellido) AS nombre,
+                r.nombre                          AS nombre_rol,
                 s.estado,
-                DATE_FORMAT(s.fecha_solicitud, '%d/%m/%Y %H:%i') AS created_at
+                DATE_FORMAT(s.created_at, '%d/%m/%Y %H:%i') AS created_at
               FROM solicitudes_rol s
               JOIN usuarios u ON s.usuario_id = u.id
-              JOIN roles    r ON s.rol_solicitado = r.id
-              ORDER BY s.fecha_solicitud DESC
+              JOIN roles    r ON s.rol_solicitado_id = r.id
+              ORDER BY s.created_at DESC
               LIMIT 20";
 
     $res = $conn->query($query);
