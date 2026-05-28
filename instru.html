@@ -984,11 +984,41 @@
     </div>
 
     <script>
-        // Estado
-        const grupos = [];
-        let grupoActivo = null; // id del grupo en detalle
+        // ============================================================
+        //  instru.html — Panel de Instructor
+        //  Conectado a APIs reales con CSRF y persistencia en BD
+        // ============================================================
 
-        /* NAVEGACIÓN */
+        let grupos = [];
+        let grupoActivo = null;
+
+        /* ── CSRF ── */
+        function getCsrfToken() {
+            return document.querySelector('meta[name="csrf-token"]')?.content ?? window.csrfToken ?? '';
+        }
+
+        async function apiFetch(url, options = {}) {
+            const method = (options.method || 'GET').toUpperCase();
+            const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+            if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+                headers['X-CSRF-Token'] = getCsrfToken();
+            }
+            const resp = await fetch(url, { ...options, headers });
+            const text = await resp.text();
+            let data;
+            try { data = JSON.parse(text); } catch (e) { throw new Error('Respuesta inválida del servidor'); }
+            if (!resp.ok && data.mensaje) throw new Error(data.mensaje);
+            if (!resp.ok && data.message) throw new Error(data.message);
+            if (!resp.ok) throw new Error('Error ' + resp.status);
+            return data;
+        }
+
+        function esc(str) {
+            if (str === null || str === undefined) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
+        /* ── NAVEGACIÓN ── */
         const panelMeta = {
             grupos: { title: 'Mis grupos', sub: 'Gestiona tus grupos y horarios' },
             solicitudes: { title: 'Solicitudes', sub: 'Solicita cambios de rol al administrador' },
@@ -998,80 +1028,58 @@
         function go(name, btn) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
-            document.getElementById('panel-' + name).classList.add('active');
+            const panel = document.getElementById('panel-' + name);
+            if (panel) panel.classList.add('active');
             if (btn) btn.classList.add('active');
             const m = panelMeta[name] || { title: name, sub: '' };
             document.getElementById('tb-title').textContent = m.title;
             document.getElementById('tb-sub').textContent = m.sub;
-            // Mostrar botón crear grupo solo en panel grupos
             document.getElementById('btn-crear-grupo').style.display = (name === 'grupos' && grupos.length > 0) ? 'flex' : 'none';
+            if (name === 'solicitudes') cargarMisSolicitudes();
+            if (name === 'notificaciones') cargarNotificaciones();
         }
 
-        /* MODALS */
+        /* ── MODALS ── */
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
         document.querySelectorAll('.overlay').forEach(o => {
             o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
         });
 
-        /* GENERAR CÓDIGO */
-        function generarCodigo() {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            let code = '';
-            for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-            return code;
+        /* ── TOAST ── */
+        function mostrarToast(msg, tipo) {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = msg;
+            if (tipo === 'error') toast.style.borderColor = 'var(--danger)';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2800);
         }
 
-        /* CREAR GRUPO */
-        function crearGrupo() {
-            const nombre = document.getElementById('grp-nombre').value.trim();
-            const clase = document.getElementById('grp-clase').value.trim();
-            const horaInicio = document.getElementById('grp-hora-inicio').value;
-            const horaFin = document.getElementById('grp-hora-fin').value;
-            const dias = document.getElementById('grp-dias').value.trim();
-            const cupo = parseInt(document.getElementById('grp-cupo').value) || 0;
-            const desc = document.getElementById('grp-desc').value.trim();
+        /* ════════════════════════════════════════════════════════════
+           GRUPOS
+           ════════════════════════════════════════════════════════════ */
 
-            if (!nombre) { alert('El nombre del grupo es requerido.'); return; }
-            if (!clase) { alert('La clase que impartes es requerida.'); return; }
-            if (horaInicio >= horaFin) { alert('La hora inicio debe ser antes de la hora fin.'); return; }
-
-            const grupo = {
-                id: 'g-' + Date.now(),
-                nombre,
-                clase,
-                horaInicio,
-                horaFin,
-                dias: dias || 'No especificado',
-                cupo,
-                desc,
-                codigo: generarCodigo(),
-                miembros: [],
-                creado: new Date().toLocaleDateString('es-CO')
-            };
-
-            grupos.push(grupo);
-            renderGrupos();
-            closeModal('modal-grupo');
-            limpiarFormGrupo();
-            // TODO: POST /api/grupos
+        async function cargarGrupos() {
+            try {
+                const data = await apiFetch('api/v1/instructor/grupos.php');
+                grupos = Array.isArray(data) ? data : [];
+                renderGrupos();
+            } catch (e) {
+                console.error('Error al cargar grupos:', e);
+                mostrarToast('Error al cargar grupos', 'error');
+            }
         }
 
-        function limpiarFormGrupo() {
-            ['grp-nombre', 'grp-clase', 'grp-dias', 'grp-desc'].forEach(id => document.getElementById(id).value = '');
-            document.getElementById('grp-cupo').value = '';
-            document.getElementById('grp-hora-inicio').value = '07:00';
-            document.getElementById('grp-hora-fin').value = '09:00';
-        }
-
-        /* RENDER GRUPOS */
         function renderGrupos() {
             const vacio = document.getElementById('grupos-vacio');
             const lista = document.getElementById('grupos-lista');
             const grid = document.getElementById('groups-grid');
             const btnTop = document.getElementById('btn-crear-grupo');
 
-            if (grupos.length === 0) {
+            if (!grupos.length) {
                 vacio.style.display = 'block';
                 lista.style.display = 'none';
                 btnTop.style.display = 'none';
@@ -1085,70 +1093,129 @@
             grid.innerHTML = grupos.map(g => `
   <div class="group-card">
     <div class="group-card-header">
-      <div class="group-card-name">${g.nombre}</div>
-      <div class="group-card-badge">${g.clase}</div>
+      <div class="group-card-name">${esc(g.nombre)}</div>
+      <div class="group-card-badge">${esc(g.clase)}</div>
     </div>
     <div class="group-card-meta">
-      <div class="group-card-row"><span>🕐</span> <span>${g.horaInicio} – ${g.horaFin}</span></div>
-      <div class="group-card-row"><span>📅</span> <span>${g.dias}</span></div>
-      <div class="group-card-row"><span>👥</span> <span>${g.miembros.length}${g.cupo ? ' / ' + g.cupo : ''} estudiantes</span></div>
+      <div class="group-card-row"><span>🕐</span> <span>${esc(g.hora_inicio)} – ${esc(g.hora_fin)}</span></div>
+      <div class="group-card-row"><span>📅</span> <span>${esc(g.dias || '—')}</span></div>
+      <div class="group-card-row"><span>👥</span> <span>${Number(g.total_miembros)}${g.cupo ? ' / ' + g.cupo : ''} estudiantes</span></div>
     </div>
     <div class="code-box">
       <div>
         <div class="code-label">Código de unión</div>
-        <div class="code-value">${g.codigo}</div>
+        <div class="code-value">${esc(g.codigo_union)}</div>
       </div>
-      <button class="code-copy" onclick="copiarCodigo('${g.codigo}')" title="Copiar código">⎘</button>
+      <button class="code-copy" onclick="copiarCodigo('${esc(g.codigo_union)}')" title="Copiar código">⎘</button>
     </div>
     <div class="group-card-actions">
-      <button class="btn btn-o btn-sm" onclick="verGrupo('${g.id}')">Ver detalle</button>
-      <button class="btn btn-d btn-sm" onclick="confirmarEliminar('${g.id}')">Eliminar</button>
+      <button class="btn btn-o btn-sm" onclick="verGrupo(${Number(g.id)})">Ver detalle</button>
+      <button class="btn btn-d btn-sm" onclick="confirmarEliminar(${Number(g.id)})">Eliminar</button>
     </div>
   </div>`).join('');
         }
 
-        /* COPIAR CÓDIGO */
         function copiarCodigo(code) {
             navigator.clipboard.writeText(code).then(() => {
-                mostrarToast('✓ Código copiado: ' + code);
+                mostrarToast('✓ Código copiado');
             }).catch(() => {
                 mostrarToast('Código: ' + code);
             });
         }
 
-        /* VER DETALLE */
-        function verGrupo(id) {
-            const g = grupos.find(x => x.id === id);
-            if (!g) return;
-            grupoActivo = id;
-            document.getElementById('det-nombre').textContent = g.nombre;
-            document.getElementById('det-clase').textContent = g.clase;
-            document.getElementById('det-code').textContent = g.codigo;
-            document.getElementById('det-horario').textContent = `${g.horaInicio} – ${g.horaFin}`;
-            document.getElementById('det-dias').textContent = g.dias;
-            document.getElementById('det-miembros').textContent = g.miembros.length;
-            document.getElementById('det-cupo').textContent = g.cupo || 'Sin límite';
-            const tbody = document.getElementById('det-tbody');
-            if (g.miembros.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Nadie se ha unido aún.</td></tr>';
-            } else {
-                tbody.innerHTML = g.miembros.map(m => `
-  <tr>
-    <td>${m.nombre}</td>
-    <td>${m.correo || '—'}</td>
-    <td><span class="badge badge-act">Activo</span></td>
-  </tr>`).join('');
+        /* ── CREAR GRUPO ── */
+        async function crearGrupo() {
+            const nombre = document.getElementById('grp-nombre').value.trim();
+            const clase = document.getElementById('grp-clase').value.trim();
+            const horaInicio = document.getElementById('grp-hora-inicio').value;
+            const horaFin = document.getElementById('grp-hora-fin').value;
+            const dias = document.getElementById('grp-dias').value.trim();
+            const cupo = parseInt(document.getElementById('grp-cupo').value) || 0;
+            const desc = document.getElementById('grp-desc').value.trim();
+            const btn = document.querySelector('#modal-grupo .btn-p');
+
+            if (!nombre) { mostrarToast('El nombre del grupo es requerido', 'error'); return; }
+            if (!clase) { mostrarToast('La clase es requerida', 'error'); return; }
+            if (horaInicio >= horaFin) { mostrarToast('La hora inicio debe ser antes de la hora fin', 'error'); return; }
+
+            btn.disabled = true;
+            btn.textContent = 'Creando...';
+
+            try {
+                const data = await apiFetch('api/v1/instructor/grupos.php', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        nombre, clase, hora_inicio: horaInicio, hora_fin: horaFin,
+                        dias: dias || 'No especificado', cupo, descripcion: desc
+                    })
+                });
+                if (data.ok !== false) {
+                    closeModal('modal-grupo');
+                    limpiarFormGrupo();
+                    await cargarGrupos();
+                    mostrarToast('✅ Grupo creado con código: ' + data.codigo_union);
+                } else {
+                    mostrarToast(data.mensaje || 'Error al crear', 'error');
+                }
+            } catch (e) {
+                mostrarToast(e.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Crear grupo';
             }
-            openModal('modal-detalle');
         }
 
-        /* ELIMINAR GRUPO */
-        function confirmarEliminar(id) {
+        function limpiarFormGrupo() {
+            ['grp-nombre', 'grp-clase', 'grp-dias', 'grp-desc'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('grp-cupo').value = '';
+            document.getElementById('grp-hora-inicio').value = '07:00';
+            document.getElementById('grp-hora-fin').value = '09:00';
+        }
+
+        /* ── VER DETALLE ── */
+        async function verGrupo(id) {
+            grupoActivo = id;
+            try {
+                const g = await apiFetch('api/v1/instructor/grupos.php?id=' + id);
+                document.getElementById('det-nombre').textContent = g.nombre || '—';
+                document.getElementById('det-clase').textContent = g.clase || '—';
+                document.getElementById('det-code').textContent = g.codigo_union || '——';
+                document.getElementById('det-horario').textContent = (g.hora_inicio || '—') + ' – ' + (g.hora_fin || '—');
+                document.getElementById('det-dias').textContent = g.dias || '—';
+                document.getElementById('det-miembros').textContent = g.total_miembros ?? 0;
+                document.getElementById('det-cupo').textContent = g.cupo || 'Sin límite';
+
+                const miembros = g.miembros || [];
+                const tbody = document.getElementById('det-tbody');
+                if (!miembros.length) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Nadie se ha unido aún.</td></tr>';
+                } else {
+                    tbody.innerHTML = miembros.map(m => `
+  <tr>
+    <td>${esc(m.Nombre + ' ' + m.Apellido)}</td>
+    <td>${esc(m.correo || '—')}</td>
+    <td><span class="badge badge-act">Activo</span></td>
+  </tr>`).join('');
+                }
+                openModal('modal-detalle');
+            } catch (e) {
+                mostrarToast('Error al cargar detalle: ' + e.message, 'error');
+            }
+        }
+
+        /* ── ELIMINAR GRUPO ── */
+        async function confirmarEliminar(id) {
             if (!confirm('¿Eliminar este grupo? Esta acción no se puede deshacer.')) return;
-            const idx = grupos.findIndex(g => g.id === id);
-            if (idx > -1) grupos.splice(idx, 1);
-            renderGrupos();
-            // TODO: DELETE /api/grupos/:id
+            try {
+                await apiFetch('api/v1/instructor/grupos.php', {
+                    method: 'DELETE',
+                    body: JSON.stringify({ id })
+                });
+                await cargarGrupos();
+                mostrarToast('✅ Grupo eliminado');
+            } catch (e) {
+                mostrarToast(e.message, 'error');
+            }
         }
 
         function eliminarGrupo() {
@@ -1158,40 +1225,109 @@
             grupoActivo = null;
         }
 
-        /* SOLICITUDES */
-        function enviarSolicitud() {
+        /* ════════════════════════════════════════════════════════════
+           SOLICITUDES
+           ════════════════════════════════════════════════════════════ */
+
+        async function cargarMisSolicitudes() {
             const tbody = document.getElementById('sol-tbody');
-            const emptyRow = tbody.querySelector('td[colspan]');
-            if (emptyRow) emptyRow.closest('tr').remove();
-            const tr = document.createElement('tr');
-            const fecha = new Date().toLocaleDateString('es-CO');
-            tr.innerHTML = `
-  <td>Administrador</td>
-  <td>${fecha}</td>
-  <td><span class="badge badge-pend">Pendiente</span></td>`;
-            tbody.appendChild(tr);
-            mostrarToast('✓ Solicitud enviada al administrador');
-            // TODO: POST /api/v1/admin/solicitudes/crear.php
+            try {
+                const data = await apiFetch('api/v1/instructor/mis-solicitudes.php');
+                if (!data || !data.length) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:30px">No has enviado solicitudes aún.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.map(s => `
+  <tr>
+    <td>${esc(s.rol_solicitado)}</td>
+    <td>${esc(s.fecha)}</td>
+    <td><span class="badge ${s.estado === 'pendiente' ? 'badge-pend' : 'badge-act'}">${esc(s.estado)}</span></td>
+  </tr>`).join('');
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--danger);padding:30px">Error al cargar solicitudes.</td></tr>';
+                console.error(e);
+            }
         }
 
-        /* NOTIFICACIONES */
+        async function enviarSolicitud() {
+            const btn = document.querySelector('#panel-solicitudes .btn-p');
+            btn.disabled = true;
+            btn.textContent = 'Enviando...';
+
+            try {
+                const data = await apiFetch('api/v1/admin/solicitudes/crear.php', {
+                    method: 'POST',
+                    body: JSON.stringify({ rol_id: 1, motivo: 'Solicito ser administrador' })
+                });
+                if (data.success) {
+                    mostrarToast('✅ Solicitud enviada al administrador');
+                    cargarMisSolicitudes();
+                } else {
+                    mostrarToast(data.message || 'Error al enviar', 'error');
+                }
+            } catch (e) {
+                mostrarToast(e.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Solicitar rol de Administrador';
+            }
+        }
+
+        /* ════════════════════════════════════════════════════════════
+           NOTIFICACIONES
+           ════════════════════════════════════════════════════════════ */
+
+        async function cargarNotificaciones() {
+            const lista = document.getElementById('notif-list');
+            try {
+                const data = await apiFetch('api/v1/admin/notificaciones.php');
+                if (!data || !data.length) {
+                    lista.innerHTML = '<p style="color:var(--muted);padding:20px 16px;font-size:13px">No hay notificaciones.</p>';
+                    return;
+                }
+                lista.innerHTML = data.map(n => `
+  <div class="notif-item">
+    <span class="notif-dot ${n.leida ? 'read' : ''}"></span>
+    <div class="notif-body">
+      <div class="notif-msg"><strong>${esc(n.asunto)}</strong> — ${esc(n.mensaje.substring(0, 120))}</div>
+      <div class="notif-time">${esc(n.tipo)} · ${n.created_at || ''}</div>
+    </div>
+  </div>`).join('');
+            } catch (e) {
+                lista.innerHTML = '<p style="color:var(--muted);padding:20px 16px;font-size:13px">Error al cargar notificaciones.</p>';
+                console.error(e);
+            }
+        }
+
         function markAllRead() {
             document.querySelectorAll('.notif-dot').forEach(d => d.classList.add('read'));
+            mostrarToast('Marcadas como leídas');
         }
 
-        /* TOAST */
-        function mostrarToast(msg) {
-            const existing = document.querySelector('.toast');
-            if (existing) existing.remove();
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = msg;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2800);
-        }
+        /* ════════════════════════════════════════════════════════════
+           INICIALIZACIÓN
+           ════════════════════════════════════════════════════════════ */
 
-        /* INIT */
-        renderGrupos();
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userRaw = localStorage.getItem('user');
+            if (!userRaw) { window.location.href = 'index.html'; return; }
+
+            try {
+                const userData = JSON.parse(userRaw);
+                const iniciales = ((userData.Nombre || '')[0] || '') + ((userData.Apellido || '')[0] || '');
+                document.getElementById('sb-av').textContent = iniciales || 'PR';
+                document.getElementById('sb-nombre').textContent = (userData.Nombre || 'Instructor') + ' ' + (userData.Apellido || '');
+
+                // Obtener CSRF token
+                const resp = await fetch('api/v1/csrf-token.php');
+                const tok = await resp.json();
+                if (tok.success) window.csrfToken = tok.csrf_token;
+            } catch (e) {
+                console.warn('Error en init:', e);
+            }
+
+            await cargarGrupos();
+        });
     </script>
 </body>
 

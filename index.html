@@ -342,6 +342,12 @@
             transform: translateY(0);
         }
 
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .alert {
             padding: 12px 16px;
             border-radius: 10px;
@@ -452,9 +458,9 @@
                     <div class="alert success" id="login-success"></div>
 
                     <div class="field">
-                        <label for="login-nickname">Usuario</label>
+                        <label for="login-nickname">Correo</label>
                         <div class="input-wrap">
-                            <input type="text" id="login-nickname" placeholder="correo" autocomplete="username"
+                            <input type="email" id="login-nickname" placeholder="correo@ejemplo.com" autocomplete="username"
                                 required />
                         </div>
                     </div>
@@ -577,75 +583,86 @@
             });
         }
 
-        // --- Lógica de Inicio de Sesión ---
-        function handleLogin() {
-            clearAlerts();
-            const correoEl = document.getElementById('login-nickname');
-            const passEl = document.getElementById('login-pass');
+    // --- Lógica de Inicio de Sesión ---
+    async function handleLogin() {
+        clearAlerts();
+        const correoEl = document.getElementById('login-nickname');
+        const passEl = document.getElementById('login-pass');
+        const btn = document.querySelector('#panel-login .submit-btn');
 
-            const correo = correoEl.value.trim();
-            const contrasena = passEl.value;
+        const correo = correoEl.value.trim();
+        const contrasena = passEl.value;
 
-            if (!correo || !contrasena) {
-                showAlert('login-error', 'Por favor completa todos los campos.');
-                return;
-            }
+        if (!correo || !contrasena) {
+            showAlert('login-error', 'Por favor completa todos los campos.');
+            return;
+        }
 
+        btn.disabled = true;
+        btn.textContent = 'Ingresando...';
+
+        try {
             const formData = new FormData();
             formData.append('correo', correo);
             formData.append('contrasena', contrasena);
 
-            fetch('api/login.php', {
+            const res = await fetch('api/login.php', {
                 method: 'POST',
                 body: formData
-            })
-                .then(res => res.json())
-                .then(data => {
-                    console.log("Respuesta servidor:", data);
+            });
+            const data = await res.json();
 
-                    if (data.ok) {
-                        showAlert('login-success', 'Bienvenido, redirigiendo...');
-                        localStorage.setItem('user', JSON.stringify(data.datos));
+            if (data.ok) {
+                showAlert('login-success', 'Bienvenido, redirigiendo...');
+                localStorage.setItem('user', JSON.stringify(data.datos));
 
-                        // REDIRECCIÓN REFORZADA
-                        setTimeout(() => {
+                    setTimeout(() => {
                             const rol = parseInt(data.datos.rol_id);
                             if (rol === 1) {
                                 window.location.replace('admin.php');
+                            } else if (rol === 2) {
+                                window.location.replace('instru.html');
                             } else {
                                 window.location.replace('user.html');
                             }
                         }, 600);
-                    } else {
-                        showAlert('login-error', data.mensaje || 'Credenciales incorrectas.');
-                    }
-                })
-                .catch(err => {
-                    console.error("Error Fetch:", err);
-                    showAlert('login-error', 'Error al conectar con el servidor.');
-                });
+            } else {
+                showAlert('login-error', data.mensaje || 'Credenciales incorrectas.');
+            }
+        } catch (err) {
+            console.error("Error Fetch:", err);
+            showAlert('login-error', 'Error al conectar con el servidor.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Iniciar sesion';
+        }
+    }
+
+    // --- Lógica de Registro ---
+    async function handleRegister() {
+        clearAlerts();
+        const nombre = document.getElementById('reg-nombre').value.trim();
+        const apellido = document.getElementById('reg-apellido').value.trim();
+        const nickname = document.getElementById('reg-nickname').value.trim();
+        const correo = document.getElementById('reg-correo').value.trim();
+        const contrasena = document.getElementById('reg-pass').value;
+        const confirmar = document.getElementById('reg-confirm').value;
+        const btn = document.querySelector('#panel-register .submit-btn');
+
+        if (!nombre || !apellido || !nickname || !correo || !contrasena || !confirmar) {
+            showAlert('reg-error', 'Por favor completa todos los campos.');
+            return;
         }
 
-        // --- Lógica de Registro ---
-        function handleRegister() {
-            clearAlerts();
-            const nombre = document.getElementById('reg-nombre').value.trim();
-            const apellido = document.getElementById('reg-apellido').value.trim();
-            const nickname = document.getElementById('reg-nickname').value.trim();
-            const correo = document.getElementById('reg-correo').value.trim();
-            const contrasena = document.getElementById('reg-pass').value;
-            const confirmar = document.getElementById('reg-confirm').value;
+        if (contrasena !== confirmar) {
+            showAlert('reg-error', 'Las contraseñas no coinciden.');
+            return;
+        }
 
-            if (!nombre || !apellido || !nickname || !correo || !contrasena || !confirmar) {
-                showAlert('reg-error', 'Por favor completa todos los campos.');
-                return;
-            }
+        btn.disabled = true;
+        btn.textContent = 'Creando cuenta...';
 
-            if (contrasena !== confirmar) {
-                showAlert('reg-error', 'Las contraseñas no coinciden.');
-                return;
-            }
-
+        try {
             const formData = new FormData();
             formData.append('nombre', nombre);
             formData.append('apellido', apellido);
@@ -653,24 +670,26 @@
             formData.append('correo', correo);
             formData.append('contrasena', contrasena);
 
-            fetch('api/register.php', {
+            const res = await fetch('api/register.php', {
                 method: 'POST',
                 body: formData
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.ok) {
-                        alert('¡Cuenta creada exitosamente!');
-                        switchTab('login');
-                    } else {
-                        showAlert('reg-error', data.mensaje || 'Error al registrar.');
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    showAlert('reg-error', 'Error al conectar con el servidor.');
-                });
+            });
+            const data = await res.json();
+
+            if (data.ok) {
+                showAlert('reg-success', 'Cuenta creada correctamente. Ahora inicia sesion.');
+                setTimeout(() => switchTab('login'), 1500);
+            } else {
+                showAlert('reg-error', data.mensaje || 'Error al registrar.');
+            }
+        } catch (err) {
+            console.error(err);
+            showAlert('reg-error', 'Error al conectar con el servidor.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Crear cuenta';
         }
+    }
 
         // --- BLOQUE DE SEGURIDAD PARA REDIRECCIÓN ---
         // Esto evita que el formulario se envíe solo y recargue la página

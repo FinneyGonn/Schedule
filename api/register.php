@@ -30,9 +30,9 @@ try {
     $passHash = password_hash($contrasena, PASSWORD_DEFAULT);
 
     // 5. Insertar (respetando mayúsculas/minúsculas de tu base de datos)
-    // Nota: rol_id lo ponemos como 2 (Usuario) por defecto
+    // Nota: rol_id lo ponemos como 3 (Estudiante) por defecto
     $sql = "INSERT INTO usuarios (Nombre, Apellido, nickname, correo, contrasena, rol_id) 
-            VALUES (?, ?, ?, ?, ?, 2)";
+            VALUES (?, ?, ?, ?, ?, 3)";
     
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$nombre, $apellido, $nickname, $correo, $passHash]);

@@ -1,7 +1,5 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
 require_once '../../../../config/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -13,6 +11,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'No has iniciado sesión.']);
+    exit;
+}
+
+$tokenHeader = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+if (empty($tokenHeader) || !hash_equals($_SESSION['csrf_token'] ?? '', $tokenHeader)) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Token CSRF inválido.']);
     exit;
 }
 
@@ -67,11 +72,11 @@ try {
     }
 
     // Obtener nombre del solicitante
-    $uStmt = $conn->prepare("SELECT nombre, apellido FROM usuarios WHERE id = ? LIMIT 1");
+    $uStmt = $conn->prepare("SELECT Nombre, Apellido FROM usuarios WHERE id = ? LIMIT 1");
     $uStmt->bind_param('i', $user_id);
     $uStmt->execute();
     $uRow = $uStmt->get_result()->fetch_assoc();
-    $nombreSolicitante = trim(($uRow['nombre'] ?? '') . ' ' . ($uRow['apellido'] ?? ''));
+    $nombreSolicitante = trim(($uRow['Nombre'] ?? '') . ' ' . ($uRow['Apellido'] ?? ''));
 
     $roles    = [1 => 'Administrador', 2 => 'Profesor'];
     $asunto   = 'Nueva solicitud de cambio de rol';

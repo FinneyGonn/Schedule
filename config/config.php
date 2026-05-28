@@ -3,6 +3,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 // 1. CONTROL DE HEADERS: Solo mandamos JSON si NO es una página visual (admin.php)
 if (!defined('PAGINA_HTML')) {
     header('Content-Type: application/json; charset=utf-8');
