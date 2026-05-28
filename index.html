@@ -616,14 +616,16 @@
                 showAlert('login-success', 'Bienvenido, redirigiendo...');
                 localStorage.setItem('user', JSON.stringify(data.datos));
 
-                setTimeout(() => {
-                    const rol = parseInt(data.datos.rol_id);
-                    if (rol === 1) {
-                        window.location.replace('admin.php');
-                    } else {
-                        window.location.replace('user.html');
-                    }
-                }, 600);
+                    setTimeout(() => {
+                            const rol = parseInt(data.datos.rol_id);
+                            if (rol === 1) {
+                                window.location.replace('admin.php');
+                            } else if (rol === 2) {
+                                window.location.replace('instru.html');
+                            } else {
+                                window.location.replace('user.html');
+                            }
+                        }, 600);
             } else {
                 showAlert('login-error', data.mensaje || 'Credenciales incorrectas.');
             }
