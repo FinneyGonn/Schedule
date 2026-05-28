@@ -16,6 +16,13 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+$tokenHeader = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+if (empty($tokenHeader) || !hash_equals($_SESSION['csrf_token'] ?? '', $tokenHeader)) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Token CSRF inválido.']);
+    exit;
+}
+
 if (!isset($conn) || $conn->connect_error) {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Sin conexión a la base de datos.']);

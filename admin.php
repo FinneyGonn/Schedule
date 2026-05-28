@@ -7,10 +7,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol_id'] != 1) {
     exit();
 }
 
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-
 $admin_nombre   = htmlspecialchars($_SESSION['nombre']   ?? 'Administrador', ENT_QUOTES, 'UTF-8');
 $admin_apellido = htmlspecialchars($_SESSION['apellido'] ?? '',               ENT_QUOTES, 'UTF-8');
 $admin_nombre_completo = trim($admin_nombre . ' ' . $admin_apellido);
@@ -421,6 +417,6 @@ $csrf_token = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
         </div>
     </div>
 
-    <script src="assets2/js/admin.js"></script>
+    <script src="assets/js/admin.js"></script>
 </body>
 </html>

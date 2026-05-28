@@ -1609,7 +1609,10 @@
             try {
                 const response = await fetch('api/v1/admin/solicitudes/crear.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': window.csrfToken || ''
+                    },
                     body: JSON.stringify({ rol_id: rol_id, motivo: motivo })
                 });
 
@@ -1640,13 +1643,21 @@
         /* ══════════════════════════════════
            INICIALIZACIÓN AL CARGAR PAGINA
         ══════════════════════════════════ */
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const userRaw = localStorage.getItem('user');
             if (userRaw) {
                 const userData = JSON.parse(userRaw);
                 initUser(userData);
             } else {
                 window.location.href = 'index.html';
+            }
+
+            try {
+                const resp = await fetch('api/v1/csrf-token.php');
+                const data = await resp.json();
+                if (data.success) window.csrfToken = data.csrf_token;
+            } catch (e) {
+                console.warn('No se pudo obtener CSRF token:', e);
             }
 
             document.querySelectorAll('.overlay').forEach(o => {
