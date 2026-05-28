@@ -7,9 +7,7 @@
 -- ── 1. Roles faltantes ──────────────────────────────────────
 -- La BD solo tiene Administrador (1) y Usuario (2).
 -- El código espera: Administrador (1), Profesor (2), Estudiante (3)
-INSERT IGNORE INTO roles (id, nombre) VALUES (2, 'Profesor');
-INSERT IGNORE INTO roles (id, nombre) VALUES (3, 'Estudiante');
-UPDATE roles SET nombre = 'Estudiante' WHERE id = 3;
+REPLACE INTO roles (id, nombre) VALUES (2, 'Profesor'), (3, 'Estudiante');
 
 -- ── 2. Columna activo en usuarios ──────────────────────────
 -- El código hace soft-delete (UPDATE usuarios SET activo = 0)
